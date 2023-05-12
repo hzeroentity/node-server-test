@@ -1,7 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const app = express();
-const port = 3000; //process.env.PORT || 
+const port = process.env.PORT || 3000;
 
 
 // Tokens List [[ID, Name, Address].[].[]...]
@@ -10,7 +10,7 @@ const _tokens = [
   ['ODOGE', 'Optimism Doge', '0x9528b1166381fe60f24a952315a3e528a56407a0', ['cointiger', 'pancakeswap'], '10'],
   ['OGGY', 'Oggy Inu', '0x92ed61fb8955cc4e392781cb8b7cd04aadc43d0c', ['cointiger', 'pancakeswap'], '10'],
   //['PIG', 'Pig Finance', '0x8850d2c68c632e3b258e612abaa8fada7e6958e5', [ 'gate', 'pancakeswap'], '5'], 
-  ['BABYDOGE', 'Baby Doge Coin', '0xc748673057861a797275cd8a068abb95a902e8de', ['kucoin', 'hotbit', 'bkex', 'pancakeswap'], '10'], //'gate'
+  ['BABYDOGE', 'Baby Doge Coin', '0xc748673057861a797275cd8a068abb95a902e8de', ['kucoin', 'gate', 'hotbit', 'bkex', 'pancakeswap'], '10'], 
   ['SUI', 'Sui', '0x2::sui::SUI', ['kucoin', 'gate', 'bkex'], '0'],
   ['OPEPE', 'Optimism PEPE', '0x0851ad49cFf57C024594Da73095E6E05d8B1676a', ['cointiger', 'pancakeswap'], '10'],
   ['FTT', 'FTX Token', 'FTT-F11', [ 'bkex', 'gate', 'kucoin'], '0'], 
@@ -76,11 +76,11 @@ app.use(function(req, res, next) {
               url = _bkexOrderBookURL + token[0] + _bkexPairDivider + 'USDT' + _bkexOrderBookParameter + '20';
               exchangeAndURL.push({ tokenInfo, exchange, url });
             break;
-            /*case 'gate':
+            case 'gate':
               tokenInfo = token[0] + '|' + token[1] + '|' + token[4];
                 url = _gateOrderBookURL + token[0] + _gatePairDivider + 'USDT';
                 exchangeAndURL.push({ tokenInfo, exchange, url });
-            break;*/
+            break;
             case 'cointiger':
               tokenInfo = token[0] + '|' + token[1] + '|' + token[4];
               url = _cointigerOrderBookURL + token[0].toLowerCase() + 'usdt' + _cointigerOrderBookParameter;
@@ -184,10 +184,27 @@ app.use(function(req, res, next) {
                       });
                       exchangeAndPrice.push(['bkex', buyPrice, sellPrice]);            
                       break;
-                  //case 'gate':
-                  //    currentPrice = negativePowerResolver(exchangeData[0].lowest_ask);
-                  //    exchangeAndPrice.push(['gate', buyPrice, sellPrice]);               
-                  //    break;
+                  case 'gate':
+                      buyPrice = null; 
+                      sellPrice = null;
+
+                      found = false;
+                      exchangeData.bids.forEach(order => {
+                          if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
+                              buyPrice = negativePowerResolver(order[0]);
+                              found = true;
+                          }
+                      });
+
+                      found = false;
+                      exchangeData.asks.forEach(order => {
+                          if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
+                              sellPrice = negativePowerResolver(order[0]);
+                              found = true;
+                          }
+                      });
+                      exchangeAndPrice.push(['gate', buyPrice, sellPrice]);
+                      break;            
                   case 'cointiger':
                       buyPrice = null; 
                       sellPrice = null;
