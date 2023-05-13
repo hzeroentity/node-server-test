@@ -52,6 +52,7 @@ const _minimumVolumeOrderBook = 5; //usd
 
 let currentData = [];
 
+const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -65,6 +66,7 @@ app.use(function(req, res, next) {
     try {
         res.json(currentData);
     } catch (error) {
+        console.log('DUDEEE ERROR HERE');
         console.error(error);
         res.sendStatus(500);
     }
@@ -80,11 +82,9 @@ app.listen(port, () => {
 
 
 async function main() {
-    const exchangeAndURL = [];
-
-    const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
     
-
+    const exchangeAndURL = [];
+    
     _tokens.forEach(token => {
 
       // Prepare URLs befor API calls
@@ -352,10 +352,10 @@ async function main() {
                 // if the trade is cex -> cex apply burn only once
                 // if the trade is dex -> cex / cex -> dex apply burn twice
                 if (tokenBurn > 0) {
-                    if (highestBuy[0].contains('/') || lowestSell[0].contains('/')) { //if it contains '/' it means that it is a pancake pair
-                        gain = (Math.round(percentageIncrease * 100) / 100).toFixed(2) - tokenBurn*2;
+                    if (highestBuy[0].includes('/') || lowestSell[0].includes('/')) { //if it contains '/' it means that it is a pancake pair
+                        gain = (Math.round(percentageIncrease * 100) / 100  - (tokenBurn * 2)).toFixed(2);
                     } else {
-                        gain = (Math.round(percentageIncrease * 100) / 100).toFixed(2) - tokenBurn;
+                        gain = (Math.round(percentageIncrease * 100) / 100 - (tokenBurn)).toFixed(2) ;
                     }
                 }
 
