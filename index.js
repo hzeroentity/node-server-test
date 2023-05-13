@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const app = express();
 const { Telegraf } = require('telegraf')
+const cron = require('node-cron');
 const port = process.env.PORT || 3000;
 
 // Tokens List [[ID, Name, Address].[].[]...]
@@ -49,6 +50,8 @@ const _gateDWStatus = 'https://api.gateio.ws/api/v4/wallet/currency_chains?curre
 // Other manually inserted values
 const _minimumVolumeOrderBook = 5; //usd
 
+let currentData = [];
+
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -58,6 +61,25 @@ app.use(function(req, res, next) {
 
   app.get('/api/data', async (req, res) => {
     const parameter = req.query.parameter;
+
+    try {
+        res.json(currentData);
+    } catch (error) {
+        console.error(error);
+        res.sendStatus(500);
+    }
+
+    
+});
+
+ 
+app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+});
+
+
+
+async function main() {
     const exchangeAndURL = [];
 
     const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
@@ -314,24 +336,35 @@ app.use(function(req, res, next) {
 
               if(index == token.exchanges.length - 1) {
 
-                  retrieveTokenInfo = token.tokenInfo.split('|');
+                retrieveTokenInfo = token.tokenInfo.split('|');
 
-                  const tokenId = retrieveTokenInfo[0];
-                  const tokenName = retrieveTokenInfo[1];
-                  const tokenBurn = retrieveTokenInfo[2];
+                const tokenId = retrieveTokenInfo[0];
+                const tokenName = retrieveTokenInfo[1];
+                const tokenBurn = retrieveTokenInfo[2];
 
-                  // calculate gain (must be moved in the data calculation before to take tokenBurn in account)
-                  let increase = highestBuy[1] - lowestSell[1];
-                  let percentageIncrease = increase / lowestSell[1] * 100;
+                // calculate gain (must be moved in the data calculation before to take tokenBurn in account)
+                let increase = highestBuy[1] - lowestSell[1];
+                let percentageIncrease = increase / lowestSell[1] * 100;
 
-                  let gain = (Math.round(percentageIncrease * 100) / 100).toFixed(2);
+                
+                let gain = 0;
 
-                  // Send Telegram Bot notification if gain > 25%
-                  if (gain >= 25) {
-                    bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, '📈 Opportunità di gain del ' + gain + '% su ' + tokenName + '! 🔥');
-                  }
+                // if the trade is cex -> cex apply burn only once
+                // if the trade is dex -> cex / cex -> dex apply burn twice
+                if (tokenBurn > 0) {
+                    if (highestBuy[0].contains('/') || lowestSell[0].contains('/')) { //if it contains '/' it means that it is a pancake pair
+                        gain = (Math.round(percentageIncrease * 100) / 100).toFixed(2) - tokenBurn*2;
+                    } else {
+                        gain = (Math.round(percentageIncrease * 100) / 100).toFixed(2) - tokenBurn;
+                    }
+                }
 
-                  readyForDOM.push({ tokenId, tokenName, tokenBurn, lowestSell, highestBuy, gain });
+                // Send Telegram Bot notification if gain > 25%
+                if (gain >= 25) {
+                bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, '📈 Opportunità di gain del ' + gain + '% su ' + tokenName + '! 🔥');
+                }
+
+                readyForDOM.push({ tokenId, tokenName, tokenBurn, lowestSell, highestBuy, gain });
               }
 
               index++; 
@@ -340,13 +373,14 @@ app.use(function(req, res, next) {
         });
 
         readyForDOM.sort((a, b) => b.gain - a.gain);
+        currentData = readyForDOM;
 
-        res.json(readyForDOM);
       } catch (error) {
         console.error(error);
-        res.sendStatus(500);
       }
-});
+}
+
+cron.schedule('*/2 * * * *', main);
 
  
 app.listen(port, () => {
