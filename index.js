@@ -60,7 +60,7 @@ app.use(function(req, res, next) {
     const parameter = req.query.parameter;
     const exchangeAndURL = [];
 
-    const bot = new Telegraf(TELEGRAM_BOT_TOKEN);
+    const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
     
 
     _tokens.forEach(token => {
@@ -328,7 +328,7 @@ app.use(function(req, res, next) {
 
                   // Send Telegram Bot notification if gain > 25%
                   if (gain >= 25) {
-                    bot.telegram.sendMessage(TELEGRAM_GROUPCHAT_ID, '📈 Opportunità di gain del ' + gain + '% su ' + tokenName + '! 🔥');
+                    bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, '📈 Opportunità di gain del ' + gain + '% su ' + tokenName + '! 🔥');
                   }
 
                   readyForDOM.push({ tokenId, tokenName, tokenBurn, lowestSell, highestBuy, gain });
