@@ -80,7 +80,6 @@ app.listen(port, () => {
 });
 
 
-
 async function main() {
     
     const exchangeAndURL = [];
@@ -125,7 +124,7 @@ async function main() {
     const readyForDOM = [];
 
     try {
-        const responseArr = await Promise.all(
+        await Promise.all(
             exchangeAndURL.map(({ tokenInfo, exchange, url }) => {
             return axios.get(url).then((response) => {
               unorderedData.push({ tokenInfo, exchange, data: response.data });
@@ -360,7 +359,7 @@ async function main() {
                 }
 
                 // Send Telegram Bot notification if gain > 25%
-                if (gain >= 25) {
+                if (gain >= 5) {
                 bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, '📈 Opportunità di gain del ' + gain + '% su ' + tokenName + '! 🔥');
                 }
 
@@ -381,11 +380,6 @@ async function main() {
 }
 
 cron.schedule('*/2 * * * *', main);
-
- 
-app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
-});
 
 
 function negativePowerResolver(number) {
