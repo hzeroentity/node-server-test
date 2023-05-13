@@ -360,7 +360,7 @@ async function main() {
 
                 // Send Telegram Bot notification if gain > 25%
                 if (gain >= 5) {
-                bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, '📈 Opportunità di gain del ' + gain + '% su ' + tokenName + '! 🔥');
+                bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, '📈 Opportunità di gain del ' + gain + '% su ' + tokenName + '! 🔥 Visualizza ora: miralmedia.it/tools/arbitrix');
                 }
 
                 readyForDOM.push({ tokenId, tokenName, tokenBurn, lowestSell, highestBuy, gain });
