@@ -1,8 +1,8 @@
 const express = require('express');
 const axios = require('axios');
 const app = express();
+const { Telegraf } = require('telegraf')
 const port = process.env.PORT || 3000;
-
 
 // Tokens List [[ID, Name, Address].[].[]...]
 // IMPORTANT:  dexes MUST be put as last on the array, price check will be valued only if there's already a set price to compare
@@ -59,6 +59,9 @@ app.use(function(req, res, next) {
   app.get('/api/data', async (req, res) => {
     const parameter = req.query.parameter;
     const exchangeAndURL = [];
+
+    const bot = new Telegraf(TELEGRAM_BOT_TOKEN);
+    
 
     _tokens.forEach(token => {
 
@@ -322,6 +325,11 @@ app.use(function(req, res, next) {
                   let percentageIncrease = increase / lowestSell[1] * 100;
 
                   let gain = (Math.round(percentageIncrease * 100) / 100).toFixed(2);
+
+                  // Send Telegram Bot notification if gain > 25%
+                  if (gain >= 25) {
+                    bot.telegram.sendMessage(TELEGRAM_GROUPCHAT_ID, '📈 Opportunità di gain del ' + gain + '% su ' + tokenName + '! 🔥');
+                  }
 
                   readyForDOM.push({ tokenId, tokenName, tokenBurn, lowestSell, highestBuy, gain });
               }
