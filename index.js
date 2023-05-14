@@ -60,17 +60,24 @@ app.use(function(req, res, next) {
     next();
 });
 
+
 app.get('/api/data', async (req, res) => {
-    const parameter = req.query.parameter;
+
+    const tokenId = req.query.parameter;
 
     try {
-        res.json(currentData);
+
+        if(tokenId != '') {
+            const index = currentData.findIndex(item => item.tokenId === tokenId)
+            res.json(currentData[index]);
+        } else {
+            res.json(currentData);
+        }
+        
     } catch (error) {
-        console.log('DUDEEE ERROR HERE');
         console.error(error);
         res.sendStatus(500);
     }
-
 });
 
  
@@ -357,7 +364,7 @@ async function main() {
                     }
                 }
 
-                // Send Telegram Bot notification if gain > 25%
+                //Send Telegram Bot notification if gain > 25%
                 if (gain >= 5) {
                 bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, '📈 Opportunità di gain del ' + gain + '% su ' + tokenName + '! 🔥 Visualizza ora: miralmedia.it/tools/arbitrix');
                 }
