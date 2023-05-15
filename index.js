@@ -379,7 +379,7 @@ async function main() {
                     bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `💵 Good gain del ${gain}% su ${tokenName}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${tokenId}`);
                 } else if (gain >= 10 && gain < 20) {
                     bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `💰 Solid gain del ${gain}% su ${tokenName}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${tokenId}`);
-                } else {
+                } else if (gain >= 20) {
                     bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `🔥 SUPER gain del ${gain}% su ${tokenName}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${tokenId}`);
                 }
 
