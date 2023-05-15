@@ -231,7 +231,7 @@ async function main() {
                       found = false;
                       exchangeData.bids.forEach(order => {
                           if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
-                              buyPrice = negativePowerResolver(order[0]);
+                              buyPrice = negativePowerResolver(order[0]  + (order[0] / 100 * token.tokenBurn));
                               found = true;
                           }
                       });
@@ -239,7 +239,7 @@ async function main() {
                       found = false;
                       exchangeData.asks.forEach(order => {
                           if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
-                              sellPrice = negativePowerResolver(order[0]);
+                              sellPrice = negativePowerResolver(order[0] - (order[0] / 100 * token.tokenBurn));
                               found = true;
                           }
                       });
