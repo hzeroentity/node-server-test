@@ -1,0 +1,131 @@
+[
+  {
+    "id": "ODOGE",
+    "name": "Optimism Doge",
+    "address": "0x9528b1166381fe60f24a952315a3e528a56407a0",
+    "exchanges": [
+      "bkex",
+      "cointiger",
+      "pancakeswap"
+    ],
+    "burn": "10"
+  },
+  {
+    "id": "OGGY",
+    "name": "Oggy Inu",
+    "address": "0x92ed61fb8955cc4e392781cb8b7cd04aadc43d0c",
+    "exchanges": [
+      "cointiger",
+      "pancakeswap"
+    ],
+    "burn": "10"
+  },
+  {
+    "id": "BABYDOGE",
+    "name": "Baby Doge Coin",
+    "address": "0xc748673057861a797275cd8a068abb95a902e8de",
+    "exchanges": [
+      "kucoin",
+      "hotbit",
+      "bkex",
+      "pancakeswap"
+    ],
+    "burn": "10"
+  },
+  {
+    "id": "OPEPE",
+    "name": "Optimism PEPE",
+    "address": "0x0851ad49cFf57C024594Da73095E6E05d8B1676a",
+    "exchanges": [
+      "cointiger",
+      "pancakeswap"
+    ],
+    "burn": "10"
+  },
+  {
+    "id": "MAZI",
+    "name": "Mazi Matic",
+    "address": "0x5b8650cd999b23cf39ab12e3213fbc8709c7f5cb",
+    "exchanges": [
+      "bkex",
+      "pancakeswap"
+    ],
+    "burn": "0"
+  },
+  {
+    "id": "SHIBCAT",
+    "name": "Shibcat",
+    "address": "0xd5FF3786CE4a75156d27aB026eb04c9eD53b365f",
+    "exchanges": [
+      "bkex",
+      "pancakeswap"
+    ],
+    "burn": "10"
+  },
+  {
+    "id": "JADE",
+    "name": "Jade Protocol",
+    "address": "0x7ad7242a99f21aa543f9650a56d141c57e4f6081",
+    "exchanges": [
+      "bkex",
+      "pancakeswap"
+    ],
+    "burn": "0"
+  },
+  {
+    "id": "FLOKICEO",
+    "name": "Floki Ceo",
+    "address": "0x45289007706E7Ee7B42b1fA506661d97740Edfb4",
+    "exchanges": [
+      "mexc",
+      "cointiger",
+      "bitmart",
+      "pancakeswap"
+    ],
+    "burn": "10"
+  },
+  {
+    "id": "DOGGY",
+    "name": "Doggy",
+    "address": "0x74926b3d118a63f6958922d3dc05eb9c6e6e00c6",
+    "exchanges": [
+      "mexc",
+      "pancakeswap"
+    ],
+    "burn": "0"
+  },
+  {
+    "id": "QUACK",
+    "name": "Rich QUACK",
+    "address": "0xD74b782E05AA25c50e7330Af541d46E18f36661C",
+    "exchanges": [
+      "mexc",
+      "latoken",
+      "bitmart",
+      "pancakeswap"
+    ],
+    "burn": "12"
+  },
+  {
+    "id": "YOOSHI",
+    "name": "YOOSHI",
+    "address": "0x02ff5065692783374947393723dba9599e59f591",
+    "exchanges": [
+      "bkex",
+      "bitmart",
+      "cointiger",
+      "pancakeswap"
+    ],
+    "burn": "10"
+  }, 
+  {
+    "id": "KABOSU",
+    "name": "Kabosu",
+    "address": "0x4A824eE819955A7D769e03fe36f9E0C3Bd3Aa60b",
+    "exchanges": [
+      "latoken",
+      "pancakeswap"
+    ],
+    "burn": "10"
+  }
+]

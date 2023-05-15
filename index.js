@@ -3,26 +3,8 @@ const axios = require('axios');
 const app = express();
 const { Telegraf } = require('telegraf')
 const cron = require('node-cron');
+const db = require('./database/database');
 const port = process.env.PORT || 3000;
-
-// Tokens List [[ID, Name, Address].[].[]...]
-// IMPORTANT:  dexes MUST be put as last on the array, price check will be valued only if there's already a set price to compare
-const _tokens = [
-  ['ODOGE', 'Optimism Doge', '0x9528b1166381fe60f24a952315a3e528a56407a0', ['cointiger', 'pancakeswap'], '10'],
-  ['OGGY', 'Oggy Inu', '0x92ed61fb8955cc4e392781cb8b7cd04aadc43d0c', ['cointiger', 'pancakeswap'], '10'],
-  //['PIG', 'Pig Finance', '0x8850d2c68c632e3b258e612abaa8fada7e6958e5', [ 'gate', 'pancakeswap'], '5'], 
-  ['BABYDOGE', 'Baby Doge Coin', '0xc748673057861a797275cd8a068abb95a902e8de', ['kucoin', 'gate', 'hotbit', 'bkex', 'pancakeswap'], '10'], 
-  ['OPEPE', 'Optimism PEPE', '0x0851ad49cFf57C024594Da73095E6E05d8B1676a', ['cointiger', 'pancakeswap'], '10'],
-  ['MAZI', 'MAziMatic', '0x5b8650cd999b23cf39ab12e3213fbc8709c7f5cb', ['bkex', 'pancakeswap'], '0'],
-  ['SHIBCAT', 'Shibcat', '0xd5FF3786CE4a75156d27aB026eb04c9eD53b365f', ['bkex', 'pancakeswap'], '10'],
-  ['JADE', 'Jade Protocol', '0x7ad7242a99f21aa543f9650a56d141c57e4f6081', ['bkex', 'pancakeswap'], '0'],
-  ['FLOKICEO', 'Floki Ceo', '0x45289007706E7Ee7B42b1fA506661d97740Edfb4', ['gate', 'cointiger', 'pancakeswap'], '10'], // Lbank, Bitmart, , MEXC, 
-  //['KABOSU', 'Kabosu', '0x4A824eE819955A7D769e03fe36f9E0C3Bd3Aa60b', ['probit',  'atoken', 'pancakeswap'], '10'],
-  //['DOGGY', 'Doggy', '0x74926b3d118a63f6958922d3dc05eb9c6e6e00c6', ['gate', 'mexc', 'bakeryswap'], '0'],
-  ['QUACK', 'RichQUACK', '0xD74b782E05AA25c50e7330Af541d46E18f36661C', ['gate', 'pancakeswap'], '12'], //latoken, mexc, bitmart
-  ['YOOSHI', 'YOOSHI', '0x02ff5065692783374947393723dba9599e59f591', ['gate',  'bkex', 'cointiger', 'pancakeswap'], '10'], //mexc, bitmart
-  // Add new tokens HERE
-];
 
 // DA FARE aggiungere exchange: bybit, bitstamp, bithumb, lbank, houbi, mexc, bitmart, probit, bitrue, indoex?, xtcom
 // aggiungere checl deposit/withdraw 
@@ -40,6 +22,7 @@ const _gateTickerURL = 'https://api.gateio.ws/api/v4/spot/tickers?currency_pair=
 const _kucoinPairDivider = '-';
 const _bkexPairDivider = '_';
 const _gatePairDivider = '_';
+const _bitmartPairDivider = '_';
 
 // API URLs for exchange's OrderBooks
 const _kucoinOrderBookURL = 'https://api.kucoin.com/api/v1/market/orderbook/level2_20?symbol='; // + pair
@@ -48,6 +31,9 @@ const _bkexOrderBookParameter = '&depth='; //number of digits to display. Must m
 const _gateOrderBookURL = 'https://api.gateio.ws/api/v4/spot/order_book?currency_pair='; // + pair
 const _cointigerOrderBookURL = 'https://api.cointiger.com/exchange/trading/api/market/depth?api_key=100310001&symbol='; //piar lowercase no divider [pigusdt] for PIG-USDT
 const _cointigerOrderBookParameter = '&type=step0';
+const _mexcOrderBookURL = 'https://api.mexc.com/api/v3/depth?symbol='; // FLOKICEOUSDT
+const _latokenOrderBookURL = 'https://api.latoken.com/v2/book/'; //QUACK/USDT
+const _bitmartOrderBookURL = 'https://api-cloud.bitmart.com/spot/v1/symbols/book?symbol='; //BMX_ETH
 
 // API URLs for deposit and withdraw availability
 const _gateDWStatus = 'https://api.gateio.ws/api/v4/wallet/currency_chains?currency='; // + currency ID ex. USDT
@@ -91,44 +77,71 @@ app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 });
 
+function databaseTest() {
+
+
+    //db.addData({id: 'PIPO', name: 'Pipo Coin', address: '0hbh3bHBDhb3bhafhsbxhsxsacs', exchanges: ['gate', 'kucoin', 'pancakeswap'], burn: 12})
+    //db.deleteDataById('PIPO')
+    const dbdata = db.readData()
+
+    _tokens.forEach(token => {
+        db.addData({id: token[0], name: token[1], address: token[2], exchanges: token[3], burn: token[4]})
+
+    })
+}
+
+
+
 
 async function main() {
     
     const exchangeAndURL = [];
+
+    const tokenList = db.readData()
     
-    _tokens.forEach(token => {
+    tokenList.forEach(token => {
 
       // Prepare URLs befor API calls
-      token[3].forEach(exchange => {
+      token.exchanges.forEach(exchange => {
   
         switch(exchange) {
             case 'kucoin':
-              tokenInfo = token[0] + '|' + token[1] + '|' + token[4];
-              url = toFetchURL = _kucoinOrderBookURL + token[0] + _kucoinPairDivider + 'USDT';
+              tokenInfo = token.id + '|' + token.name + '|' + token.burn;
+              url = toFetchURL = _kucoinOrderBookURL + token.id + _kucoinPairDivider + 'USDT';
               exchangeAndURL.push({ tokenInfo, exchange, url });
             break;
             case 'bkex':
-              tokenInfo = token[0] + '|' + token[1] + '|' + token[4];
-              if (token[0]=='SQUIDGROW') {
-                url = _bkexOrderBookURL + 'SquidGrow' + _bkexPairDivider + 'USDT' + _bkexOrderBookParameter + '20';
+              tokenInfo = token.id + '|' + token.name + '|' + token.burn;
+              if (token.id == 'ODOGE') {
+                url = _bkexOrderBookURL + 'OPTIMISMDOGE' + _bkexPairDivider + 'USDT' + _bkexOrderBookParameter + '20';
               } else {
-                url = _bkexOrderBookURL + token[0] + _bkexPairDivider + 'USDT' + _bkexOrderBookParameter + '20';
+                url = _bkexOrderBookURL + token.id + _bkexPairDivider + 'USDT' + _bkexOrderBookParameter + '20';
               }
               exchangeAndURL.push({ tokenInfo, exchange, url });
             break;
-            case 'gate':
-              tokenInfo = token[0] + '|' + token[1] + '|' + token[4];
-                url = _gateOrderBookURL + token[0] + _gatePairDivider + 'USDT';
-                exchangeAndURL.push({ tokenInfo, exchange, url });
-            break;
             case 'cointiger':
-              tokenInfo = token[0] + '|' + token[1] + '|' + token[4];
-              url = _cointigerOrderBookURL + token[0].toLowerCase() + 'usdt' + _cointigerOrderBookParameter;
+              tokenInfo = token.id + '|' + token.name + '|' + token.burn;
+              url = _cointigerOrderBookURL + token.id.toLowerCase() + 'usdt' + _cointigerOrderBookParameter;
+              exchangeAndURL.push({ tokenInfo, exchange, url });
+            break;
+            case 'mexc':
+              tokenInfo = token.id + '|' + token.name + '|' + token.burn;
+              url = _mexcOrderBookURL + token.id + 'USDT';
+              exchangeAndURL.push({ tokenInfo, exchange, url });
+            break;
+            case 'latoken':
+              tokenInfo = token.id + '|' + token.name + '|' + token.burn;
+              url = _latokenOrderBookURL + token.id + '/USDT';
+              exchangeAndURL.push({ tokenInfo, exchange, url });
+            break;
+            case 'bitmart':
+              tokenInfo = token.id + '|' + token.name + '|' + token.burn;
+              url = _bitmartOrderBookURL + token.id + _bitmartPairDivider + 'USDT';
               exchangeAndURL.push({ tokenInfo, exchange, url });
             break;
             case 'pancakeswap':
-              tokenInfo = token[0] + '|' + token[1] + '|' + token[4];
-              url = _dexScreenerURL + token[2];
+              tokenInfo = token.id + '|' + token.name + '|' + token.burn;
+              url = _dexScreenerURL + token.address;
               exchangeAndURL.push({ tokenInfo, exchange, url });
             break;
           } 
@@ -224,27 +237,6 @@ async function main() {
                       });
                       exchangeAndPrice.push(['bkex', buyPrice, sellPrice]);            
                       break;
-                  case 'gate':
-                      buyPrice = null; 
-                      sellPrice = null;
-
-                      found = false;
-                      exchangeData.bids.forEach(order => {
-                          if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
-                              buyPrice = negativePowerResolver(order[0]  + (order[0] / 100 * token.tokenBurn));
-                              found = true;
-                          }
-                      });
-
-                      found = false;
-                      exchangeData.asks.forEach(order => {
-                          if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
-                              sellPrice = negativePowerResolver(order[0] - (order[0] / 100 * token.tokenBurn));
-                              found = true;
-                          }
-                      });
-                      exchangeAndPrice.push(['gate', buyPrice, sellPrice]);
-                      break;            
                   case 'cointiger':
                       buyPrice = null; 
                       sellPrice = null;
@@ -267,6 +259,75 @@ async function main() {
 
                       exchangeAndPrice.push(['cointiger', buyPrice, sellPrice]);                 
                       break;
+                  case 'mexc':
+                      buyPrice = null; 
+                      sellPrice = null;
+
+                      found = false;
+                      exchangeData.bids.forEach(order => {
+                          if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
+                              buyPrice = negativePowerResolver(order[0]);
+                              found = true;
+                          }
+                      });
+
+                      found = false;
+                      exchangeData.asks.forEach(order => {
+                          if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
+                              sellPrice = negativePowerResolver(order[0]);
+                              found = true;
+                          }
+                      });
+                      exchangeAndPrice.push(['mexc', buyPrice, sellPrice]);            
+                    break;
+                  case 'latoken':
+                      buyPrice = null; 
+                      sellPrice = null;
+
+                      found = false;
+
+                      exchangeData.bid.map(order => {
+                          if(order.price * order.quantity > _minimumVolumeOrderBook && found == false) {
+                              buyPrice = negativePowerResolver(order.price);
+                              found = true;
+                          }
+                      });
+
+                      found = false;
+                      exchangeData.ask.map(order => {
+                          if(order.price * order.quantity > _minimumVolumeOrderBook && found == false) {
+                              sellPrice = negativePowerResolver(order.price);
+                              found = true;
+                          }
+                      });
+                     
+                      exchangeAndPrice.push(['latoken', buyPrice, sellPrice]);            
+                    break;
+                  case 'bitmart':
+                      buyPrice = null; 
+                      sellPrice = null;
+
+                      found = false;
+
+                      exchangeData.data.sells.map(order => {
+                        const prezzo = negativePowerResolver(order.price)
+                          if(prezzo * order.amount > _minimumVolumeOrderBook && found == false) {
+                              buyPrice = negativePowerResolver(prezzo);
+                              found = true;
+                          }
+                      });
+
+                      found = false;
+                      exchangeData.data.buys.map(order => {
+                        const prezzo = negativePowerResolver(order.price)
+                          if(prezzo * order.amount > _minimumVolumeOrderBook && found == false) {
+                              sellPrice = negativePowerResolver(prezzo);
+                              found = true;
+                          }
+                      });
+                     
+                      exchangeAndPrice.push(['bitmart', buyPrice, sellPrice]);            
+                    break;
                   case 'pancakeswap':
 
                       const dexPairs = exchangeData.pairs;
@@ -376,7 +437,7 @@ async function main() {
                     gain = percentageIncrease.toFixed(2);
                 }
 
-                //Send Telegram Bot notification if gain > 25%
+                // Send Telegram Bot notification if gain > 25%
                 if (gain >= 5 && gain < 10) {
                     bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `💵 Good gain del ${gain}% su ${tokenName}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${tokenId}`);
                 } else if (gain >= 10 && gain < 20) {
@@ -409,8 +470,10 @@ function negativePowerResolver(number) {
     //Number() up to the power of 6
     try {
 
-        if(number.toString().includes('e-')) {
-            let splitNumber = number.toString().split('e-');
+        if(number.toString().includes('e-') || number.toString().includes('E-')) {
+
+            let splitNumber = number.toString().split('-');
+            splitNumber[0] = splitNumber[0].slice(0, -1);
 
             if (splitNumber[1] > 6 ) {
     
