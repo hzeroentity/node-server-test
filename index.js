@@ -13,7 +13,6 @@ const _tokens = [
   //['PIG', 'Pig Finance', '0x8850d2c68c632e3b258e612abaa8fada7e6958e5', [ 'gate', 'pancakeswap'], '5'], 
   ['BABYDOGE', 'Baby Doge Coin', '0xc748673057861a797275cd8a068abb95a902e8de', ['kucoin', 'gate', 'hotbit', 'bkex', 'pancakeswap'], '10'], 
   ['OPEPE', 'Optimism PEPE', '0x0851ad49cFf57C024594Da73095E6E05d8B1676a', ['cointiger', 'pancakeswap'], '10'],
-  ['SQUIDGROW', 'SquidGrow', '0x88479186BAC914E4313389a64881F5ed0153C765', ['gate', 'bkex', 'cointiger', 'pancakeswap'], '8'], //MEXC, Bitmart, XT,
   ['MAZI', 'MAziMatic', '0x5b8650cd999b23cf39ab12e3213fbc8709c7f5cb', ['bkex', 'pancakeswap'], '0'],
   ['SHIBCAT', 'Shibcat', '0xd5FF3786CE4a75156d27aB026eb04c9eD53b365f', ['bkex', 'pancakeswap'], '10'],
   ['JADE', 'Jade Protocol', '0x7ad7242a99f21aa543f9650a56d141c57e4f6081', ['bkex', 'pancakeswap'], '0'],
@@ -376,8 +375,12 @@ async function main() {
                 }
 
                 //Send Telegram Bot notification if gain > 25%
-                if (gain >= 5) {
-                bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, '📈 Opportunità di gain del ' + gain + '% su ' + tokenName + '! 🔥 Visualizza ora: miralmedia.it/tools/arbitrix');
+                if (gain >= 5 && gain < 10) {
+                    bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `💵 Good gain del ${gain}% su ${tokenName}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${tokenId}`);
+                } else if (gain >= 10 && gain < 20) {
+                    bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `💰 Solid gain del ${gain}% su ${tokenName}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${tokenId}`);
+                } else {
+                    bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `🔥 SUPER gain del ${gain}% su ${tokenName}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${tokenId}`);
                 }
 
                 readyForDOM.push({ tokenId, tokenName, tokenBurn, lowestSell, highestBuy, gain });
