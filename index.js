@@ -372,6 +372,8 @@ async function main() {
                     } else {
                         gain = (Math.round(percentageIncrease * 100) / 100 - (tokenBurn)).toFixed(2) ;
                     }
+                } else {
+                    gain = percentageIncrease;
                 }
 
                 //Send Telegram Bot notification if gain > 25%
