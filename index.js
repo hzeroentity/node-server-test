@@ -110,7 +110,11 @@ async function main() {
             break;
             case 'bkex':
               tokenInfo = token[0] + '|' + token[1] + '|' + token[4];
-              url = _bkexOrderBookURL + token[0] + _bkexPairDivider + 'USDT' + _bkexOrderBookParameter + '20';
+              if (token[0]=='SQUIDGROW') {
+                url = _bkexOrderBookURL + 'SquidGrow' + _bkexPairDivider + 'USDT' + _bkexOrderBookParameter + '20';
+              } else {
+                url = _bkexOrderBookURL + token[0] + _bkexPairDivider + 'USDT' + _bkexOrderBookParameter + '20';
+              }
               exchangeAndURL.push({ tokenInfo, exchange, url });
             break;
             case 'gate':
