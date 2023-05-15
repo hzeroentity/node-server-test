@@ -12,9 +12,16 @@ const _tokens = [
   ['OGGY', 'Oggy Inu', '0x92ed61fb8955cc4e392781cb8b7cd04aadc43d0c', ['cointiger', 'pancakeswap'], '10'],
   //['PIG', 'Pig Finance', '0x8850d2c68c632e3b258e612abaa8fada7e6958e5', [ 'gate', 'pancakeswap'], '5'], 
   ['BABYDOGE', 'Baby Doge Coin', '0xc748673057861a797275cd8a068abb95a902e8de', ['kucoin', 'gate', 'hotbit', 'bkex', 'pancakeswap'], '10'], 
-  ['SUI', 'Sui', '0x2::sui::SUI', ['kucoin', 'gate', 'bkex'], '0'],
   ['OPEPE', 'Optimism PEPE', '0x0851ad49cFf57C024594Da73095E6E05d8B1676a', ['cointiger', 'pancakeswap'], '10'],
-  ['FTT', 'FTX Token', 'FTT-F11', [ 'bkex', 'gate', 'kucoin'], '0'], 
+  ['SQUIDGROW', 'SquidGrow', '0x88479186BAC914E4313389a64881F5ed0153C765', ['gate', 'bkex', 'cointiger', 'pancakeswap'], '8'], //MEXC, Bitmart, XT,
+  ['MAZI', 'MAziMatic', '0x5b8650cd999b23cf39ab12e3213fbc8709c7f5cb', ['bkex', 'pancakeswap'], '0'],
+  ['SHIBCAT', 'Shibcat', '0xd5FF3786CE4a75156d27aB026eb04c9eD53b365f', ['bkex', 'pancakeswap'], '10'],
+  ['JADE', 'Jade Protocol', '0x7ad7242a99f21aa543f9650a56d141c57e4f6081', ['bkex', 'pancakeswap'], '0'],
+  ['FLOKICEO', 'Floki Ceo', '0x45289007706E7Ee7B42b1fA506661d97740Edfb4', ['gate', 'cointiger', 'pancakeswap'], '10'], // Lbank, Bitmart, , MEXC, 
+  //['KABOSU', 'Kabosu', '0x4A824eE819955A7D769e03fe36f9E0C3Bd3Aa60b', ['probit',  'atoken', 'pancakeswap'], '10'],
+  //['DOGGY', 'Doggy', '0x74926b3d118a63f6958922d3dc05eb9c6e6e00c6', ['gate', 'mexc', 'bakeryswap'], '0'],
+  ['QUACK', 'RichQUACK', '0xD74b782E05AA25c50e7330Af541d46E18f36661C', ['gate', 'pancakeswap'], '12'], //latoken, mexc, bitmart
+  ['YOOSHI', 'YOOSHI', '0x02ff5065692783374947393723dba9599e59f591', ['gate',  'bkex', 'cointiger', 'pancakeswap'], '10'], //mexc, bitmart
   // Add new tokens HERE
 ];
 
