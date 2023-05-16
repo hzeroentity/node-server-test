@@ -6,12 +6,6 @@ const cron = require('node-cron');
 const db = require('./database/database');
 const port = process.env.PORT || 3000;
 
-// DA FARE aggiungere exchange: bybit, bitstamp, bithumb, lbank, houbi, mexc, bitmart, probit, bitrue, indoex?, xtcom
-// aggiungere checl deposit/withdraw 
-
-const BABYDOGE = "0xc748673057861a797275CD8A068AbB95A902e8de";
-const Symbol = "BABYDOGE"
-
 // API URLs for tokens info in exchanges 
 const _dexScreenerURL = 'https://api.dexscreener.com/latest/dex/tokens/'; // + symbol
 const _kucoinTickerURL = 'https://api.kucoin.com/api/v1/market/orderbook/level1?symbol='; // + pair [BABYDOGE-USDT]
@@ -82,10 +76,8 @@ app.get('/api/tokens', async (req, res) => {
     try {
 
         if(tokenId != '') {
-            console.log('AAAAAAAAAA')
             res.json(getTokens(tokenId));
         } else {
-            console.log('BBBBBBBBBB')
             res.json(getTokens(''));
         }
         
@@ -111,30 +103,31 @@ app.get('/api/tokens/delete', async (req, res) => {
     }
 });
 
+/*pp.get('/api/tokens/udate', async (req, res) => {
+
+    const tokenId = req.query.parameter;
+
+    try {
+
+        if(tokenId != '') {
+            updateToken(tokenId);
+        }
+        
+    } catch (error) {
+        console.error(error);
+        res.sendStatus(500);
+    }
+});*/
+
+
  
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 });
 
-function databaseTest() {
-
-
-    //db.addData({id: 'PIPO', name: 'Pipo Coin', address: '0hbh3bHBDhb3bhafhsbxhsxsacs', exchanges: ['gate', 'kucoin', 'pancakeswap'], burn: 12})
-    //db.deleteDataById('PIPO')
-    const dbdata = db.readData()
-
-    _tokens.forEach(token => {
-        db.addData({id: token[0], name: token[1], address: token[2], exchanges: token[3], burn: token[4]})
-
-    })
-}
-
-
 function getTokens(id) {
 
     const tokens = db.readData();
-
-    console.log(tokens)
 
     if (id != '') {
         return tokens.find(item => item.id === id);
@@ -151,9 +144,13 @@ function deleteToken(id) {
     }
 }
 
+/*function updateToken(id, name, address, exchanges, burn) {
 
-
-
+    if (id != '') {
+        db.updateDataById(id, name, address, exchanges, burn);
+    } else {
+    }
+}*/
 
 
 async function main() {
