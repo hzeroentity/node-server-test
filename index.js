@@ -73,6 +73,44 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
+app.get('/api/tokens', async (req, res) => {
+
+    const tokenId = req.query.parameter;
+
+    console.log(tokenId)
+
+    try {
+
+        if(tokenId != '') {
+            console.log('AAAAAAAAAA')
+            res.json(getTokens(tokenId));
+        } else {
+            console.log('BBBBBBBBBB')
+            res.json(getTokens(''));
+        }
+        
+    } catch (error) {
+        console.error(error);
+        res.sendStatus(500);
+    }
+});
+
+app.get('/api/tokens/delete', async (req, res) => {
+
+    const tokenId = req.query.parameter;
+
+    try {
+
+        if(tokenId != '') {
+            deleteToken(tokenId);
+        }
+        
+    } catch (error) {
+        console.error(error);
+        res.sendStatus(500);
+    }
+});
+
  
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
@@ -90,6 +128,30 @@ function databaseTest() {
 
     })
 }
+
+
+function getTokens(id) {
+
+    const tokens = db.readData();
+
+    console.log(tokens)
+
+    if (id != '') {
+        return tokens.find(item => item.id === id);
+    } else {
+        return tokens;
+    }
+}
+
+function deleteToken(id) {
+
+    if (id != '') {
+        db.deleteDataById(id);
+    } else {
+    }
+}
+
+
 
 
 
@@ -490,6 +552,17 @@ async function main() {
 }
 
 cron.schedule('*/2 * * * *', main);
+
+function updateAlertsGain(alertsArray, id, newGain) {
+    const updatedAlertsArray = alertsArray.map(item => {
+      if (item.id == id) {
+        return { ...item, gain: newGain }; // Update the gain value
+      }
+      return item;
+    });
+    return updatedAlertsArray;
+  }
+
 
 function sendTelegramAlert(id, name, gain, burn) {
         // Send Telegram Bot notifications
