@@ -161,20 +161,6 @@
     "burn": "9"
   },
   {
-    "id": "VOLT",
-    "name": "Volt Inu V2",
-    "address": "0x7db5af2B9624e1b3B4Bb69D6DeBd9aD1016A58Ac",
-    "exchanges": [
-      "cointiger",
-      "bkex",
-      "mexc",
-      "latoken",
-      "bitmart",
-      "pancakeswap"
-    ],
-    "burn": "0"
-  },
-  {
     "id": "DOGEAI",
     "name": "DogeCEO Ai",
     "address": "0xd85f89EA9a43942d86965C62b93ECe0867925765",
