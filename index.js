@@ -310,19 +310,19 @@ async function main() {
 
                       found = false;
 
-                      exchangeData.data.sells.map(order => {
-                        const prezzo = negativePowerResolver(order.price)
-                          if(prezzo * order.amount > _minimumVolumeOrderBook && found == false) {
-                              buyPrice = negativePowerResolver(prezzo);
+                      exchangeData.data.buys.map(order => {
+                        const bitmartPrice = negativePowerResolver(order.price)
+                          if(bitmartPrice * order.amount > _minimumVolumeOrderBook && found == false) {
+                              buyPrice = negativePowerResolver(bitmartPrice);
                               found = true;
                           }
                       });
 
                       found = false;
-                      exchangeData.data.buys.map(order => {
-                        const prezzo = negativePowerResolver(order.price)
-                          if(prezzo * order.amount > _minimumVolumeOrderBook && found == false) {
-                              sellPrice = negativePowerResolver(prezzo);
+                      exchangeData.data.sells.map(order => {
+                        const bitmartPrice = negativePowerResolver(order.price)
+                          if(bitmartPrice * order.amount > _minimumVolumeOrderBook && found == false) {
+                              sellPrice = negativePowerResolver(bitmartPrice);
                               found = true;
                           }
                       });
