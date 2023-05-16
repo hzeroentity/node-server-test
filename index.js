@@ -43,6 +43,7 @@ const _gateDWStatus = 'https://api.gateio.ws/api/v4/wallet/currency_chains?curre
 const _minimumVolumeOrderBook = 5; //usd
 
 let currentData = [];
+let activeAlerts = [];
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
@@ -437,13 +438,39 @@ async function main() {
                     gain = percentageIncrease.toFixed(2);
                 }
 
-                // Send Telegram Bot notification if gain > 25%
-                if (gain >= 5 && gain < 10) {
-                    bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `💵 Good gain del ${gain}% su ${tokenName}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${tokenId}`);
-                } else if (gain >= 10 && gain < 20) {
-                    bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `💰 Solid gain del ${gain}% su ${tokenName}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${tokenId}`);
-                } else if (gain >= 20) {
-                    bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `🔥 SUPER gain del ${gain}% su ${tokenName}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${tokenId}`);
+
+                let lowBurn = false;
+                let highBurn = false;
+
+                if (tokenBurn >= 8 && gain > 5) {
+                    highBurn = true;
+                } else if (tokenBurn < 8 && gain > 3) {
+                    lowBurn = true;
+                }
+
+                if (lowBurn == true || highBurn == true) {
+                    const checkExistingAlert = activeAlerts.find(item => item.id === tokenId);
+
+                    if (checkExistingAlert) {
+                        console.log('alert existing')
+                        if (checkExistingAlert.gain - 1 > gain ) {
+                            activeAlerts = updateAlertsGain(activeAlerts, tokenId, gain);
+                            sendTelegramAlert(tokenId, tokenName, gain, tokenBurn);
+                        } else {
+                            if (tokenBurn >= 8) {
+                                if (gain < 5) {
+                                    activeAlerts = activeAlerts.filter(item => item.id == tokenId);
+                                }
+                            } else {
+                                if (gain < 3) {
+                                    activeAlerts = activeAlerts.filter(item => item.id == tokenId);
+                                }
+                            }
+                        }
+                    } else {
+                        activeAlerts.push({ id: tokenId, name: tokenName, gain: gain });
+                        sendTelegramAlert(tokenId, tokenName, gain, tokenBurn);
+                    }
                 }
 
                 readyForDOM.push({ tokenId, tokenName, tokenBurn, lowestSell, highestBuy, gain });
@@ -463,6 +490,27 @@ async function main() {
 }
 
 cron.schedule('*/2 * * * *', main);
+
+function sendTelegramAlert(id, name, gain, burn) {
+        // Send Telegram Bot notifications
+        if (burn >= 8) {
+            if (gain >= 5 && gain < 10) {
+                bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `💵 Good gain del ${gain}% su ${name}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${id}`);
+            } else if (gain >= 10 && gain < 20) {
+                bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `💰 Solid gain del ${gain}% su ${name}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${id}`);
+            } else if (gain >= 20) {
+                bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `🔥 SUPER gain del ${gain}% su ${name}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${id}`);
+            }
+        } else {
+            if (gain >= 3 && gain < 5) {
+                bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `💵 Good gain del ${gain}% su ${name}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${id}`);
+            } else if (gain >= 5 && gain < 9) {
+                bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `💰 Solid gain del ${gain}% su ${name}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${id}`);
+            } else if (gain >= 9) {
+                bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `🔥 SUPER gain del ${gain}% su ${name}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${id}`);
+            }
+        }
+}
 
 
 function negativePowerResolver(number) {
