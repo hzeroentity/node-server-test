@@ -127,5 +127,83 @@
       "pancakeswap"
     ],
     "burn": "10"
+  },
+  {
+    "id": "PEPEBNB",
+    "name": "Pepe The Frog",
+    "address": "0x47fd014706081068448b89fc6baca2730977216a",
+    "exchanges": [
+      "bitmart",
+      "mexc",
+      "cointiger",
+      "pancakeswap"
+    ],
+    "burn": "0"
+  },
+  {
+    "id": "KUNGFU",
+    "name": "KungFu Inu",
+    "address": "0xA1CCD6982C111D3fe5BF348044335bA0fEFCA688",
+    "exchanges": [
+      "cointiger",
+      "pancakeswap"
+    ],
+    "burn": "12"
+  }, 
+  {
+    "id": "PPUSDT",
+    "name": "PepeUSDT",
+    "address": "0x6F5B3258c0848e1b9be4C10a4D768db9C735Ba12",
+    "exchanges": [
+      "cointiger",
+      "pancakeswap"
+    ],
+    "burn": "9"
+  },
+  {
+    "id": "VOLT",
+    "name": "Volt Inu V2",
+    "address": "0x7db5af2B9624e1b3B4Bb69D6DeBd9aD1016A58Ac",
+    "exchanges": [
+      "cointiger",
+      "bkex",
+      "mexc",
+      "latoken",
+      "bitmart",
+      "pancakeswap"
+    ],
+    "burn": "0"
+  },
+  {
+    "id": "DOGEAI",
+    "name": "DogeCEO Ai",
+    "address": "0xd85f89EA9a43942d86965C62b93ECe0867925765",
+    "exchanges": [
+      "cointiger",
+      "pancakeswap"
+    ],
+    "burn": "10"
+  },
+  {
+    "id": "RET",
+    "name": "Renewable Energy",
+    "address": "0x10b9dd394467f2cfbc769e07e88dc7e2c41b0965",
+    "exchanges": [
+      "cointiger",
+      "latoken",
+      "mexc",
+      "pancakeswap"
+    ],
+    "burn": "4"
+  },
+  {
+    "id": "FAI",
+    "name": "FlokiTer",
+    "address": "0x459fab6be3b07558e28fecb07b64a481d0e8c6a3",
+    "exchanges": [
+      "cointiger",
+      "pancakeswap"
+    ],
+    "burn": "5"
   }
 ]
