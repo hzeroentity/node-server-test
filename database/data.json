@@ -181,15 +181,5 @@
       "pancakeswap"
     ],
     "burn": "4"
-  },
-  {
-    "id": "FAI",
-    "name": "FlokiTer",
-    "address": "0x459fab6be3b07558e28fecb07b64a481d0e8c6a3",
-    "exchanges": [
-      "cointiger",
-      "pancakeswap"
-    ],
-    "burn": "5"
   }
 ]
