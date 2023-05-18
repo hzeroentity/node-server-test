@@ -258,11 +258,14 @@ async function main() {
                   case 'kucoin':
                     greenPrice = null; 
                     redPrice = null;
+                    greenAvailableLiquidity = null;
+                    redAvailableLiquidity = null;
 
                     found = false;
                     exchangeData.data.bids.forEach(order => {
                         if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
                             greenPrice = negativePowerResolver(order[0]);
+                            greenAvailableLiquidity = order[1] * order[0];
                             found = true;
                         }
                     });
@@ -271,20 +274,23 @@ async function main() {
                     exchangeData.data.asks.forEach(order => {
                         if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
                             redPrice = negativePowerResolver(order[0]);
+                            redAvailableLiquidity = order[1] * order[0];
                             found = true;
                         }
                     });
-                    exchangeAndPrice.push(['kucoin', redPrice, greenPrice]);
+                    exchangeAndPrice.push(['kucoin', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);
                     break;
                   case 'bkex':
                     greenPrice = null;    
                     redPrice = null; 
-                      
+                    greenAvailableLiquidity = null;
+                    redAvailableLiquidity = null;
 
                       found = false;
                       exchangeData.data.bid.forEach(order => {
                           if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
                             greenPrice = negativePowerResolver(order[0]);
+                            greenAvailableLiquidity = order[1] * order[0];
                               found = true;
                           }
                       });
@@ -293,42 +299,50 @@ async function main() {
                       exchangeData.data.ask.forEach(order => {
                           if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
                             redPrice = negativePowerResolver(order[0]);
+                            redAvailableLiquidity = order[1] * order[0];
                               found = true;
                           }
                       });
 
-                      exchangeAndPrice.push(['bkex', redPrice, greenPrice]);            
+                      exchangeAndPrice.push(['bkex', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
                       break;
                   case 'cointiger':
-                       greenPrice = null; 
-                       redPrice= null;
+                    greenPrice = null; 
+                    redPrice= null;
+                    greenAvailableLiquidity = null;
+                    redAvailableLiquidity = null;
 
-                      found = false;
-                      exchangeData.data.depth_data.tick.buys.forEach(order => {
-                          if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
-                              greenPrice = negativePowerResolver(order[0]);
-                              found = true;
-                          }
-                      });
+                    found = false;
+                    exchangeData.data.depth_data.tick.buys.forEach(order => {
+                        if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
+                            greenPrice = negativePowerResolver(order[0]);
+                            greenAvailableLiquidity = order[1] * order[0];
+                            found = true;
+                        }
+                    });
 
-                      found = false;
-                      exchangeData.data.depth_data.tick.asks.forEach(order => {
-                          if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
-                              redPrice = negativePowerResolver(order[0]);
-                              found = true;
-                          }
-                      });
+                    found = false;
+                    exchangeData.data.depth_data.tick.asks.forEach(order => {
+                        if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
+                            redPrice = negativePowerResolver(order[0]);
+                            redAvailableLiquidity = order[1] * order[0];
+                            found = true;
+                        }
+                    });
 
-                      exchangeAndPrice.push(['cointiger', redPrice, greenPrice]);                 
-                      break;
+                    exchangeAndPrice.push(['cointiger', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);                 
+                    break;
                   case 'mexc':
                     greenPrice = null; 
                     redPrice = null;
+                    greenAvailableLiquidity = null;
+                    redAvailableLiquidity = null;
 
                     found = false;
                     exchangeData.bids.forEach(order => {
                         if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
                             greenPrice = negativePowerResolver(order[0]);
+                            greenAvailableLiquidity = order[1] * order[0];
                             found = true;
                         }
                     });
@@ -337,58 +351,67 @@ async function main() {
                     exchangeData.asks.forEach(order => {
                         if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
                             redPrice = negativePowerResolver(order[0]);
+                            redAvailableLiquidity = order[1] * order[0];
                             found = true;
                         }
                     });
-                    exchangeAndPrice.push(['mexc', redPrice, greenPrice]);            
+                    exchangeAndPrice.push(['mexc', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
                     break;
                   case 'latoken':
                     greenPrice = null; 
                     redPrice = null;
+                    greenAvailableLiquidity = null;
+                    redAvailableLiquidity = null;
 
                     found = false;
 
                     exchangeData.bid.map(order => {
                         if(order.price * order.quantity > _minimumVolumeOrderBook && found == false) {
                             greenPrice = negativePowerResolver(order.price);
+                            greenAvailableLiquidity = order.price * order.quantity;
                             found = true;
                         }
                     });
 
                     found = false;
                     exchangeData.ask.map(order => {
-                        if(order.price * order.quantity > _minimumVolumeOrderBook && found == false) {
+                        if(order.price * order.quantity> _minimumVolumeOrderBook && found == false) {
                             redPrice = negativePowerResolver(order.price);
+                            redAvailableLiquidity = order.price * order.quantity;
                             found = true;
                         }
                     });
                     
-                    exchangeAndPrice.push(['latoken', redPrice, greenPrice]);            
+                    exchangeAndPrice.push(['latoken', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
                     break;
                   case 'bitmart':
                     greenPrice = null; 
                     redPrice = null;
+                    greenAvailableLiquidity = null;
+                    redAvailableLiquidity = null;
 
                     found = false;
 
                     exchangeData.data.buys.map(order => {
-                    const bitmartPrice = negativePowerResolver(order.price)
+                        const bitmartPrice = negativePowerResolver(order.price)
                         if(bitmartPrice * order.amount > _minimumVolumeOrderBook && found == false) {
                             greenPrice = negativePowerResolver(bitmartPrice);
+                            greenAvailableLiquidity = bitmartPrice * order.amount;
                             found = true;
                         }
                     });
 
                     found = false;
                     exchangeData.data.sells.map(order => {
-                    const bitmartPrice = negativePowerResolver(order.price)
+                        const bitmartPrice = negativePowerResolver(order.price)
                         if(bitmartPrice * order.amount > _minimumVolumeOrderBook && found == false) {
                             redPrice = negativePowerResolver(bitmartPrice);
+                            redAvailableLiquidity = bitmartPrice * order.amount;
                             found = true;
                         }
                     });
                     
-                    exchangeAndPrice.push(['bitmart', redPrice, greenPrice]);            
+                    exchangeAndPrice.push(['bitmart', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
                     break;
                   case 'pancakeswap':
 
@@ -435,28 +458,32 @@ async function main() {
                   break;
               }               
 
-              let highestGreen = ['',''];
-              let lowestRed = ['',''];
+              let highestGreen = ['','',''];
+              let lowestRed = ['','',''];
               
               let first = true;
 
               // find cexes highest ask and lowest bid
               exchangeAndPrice.forEach(line => {
                   if(first) {
-                    lowestRed[0] = line[0]
+                    lowestRed[0] = line[0];
                     lowestRed[1] = line[1];
+                    lowestRed[2] = line[3];
                     
                     highestGreen[0] = line[0];
                     highestGreen[1] = line[2];
+                    highestGreen[2] = line[4];
                     first = false;
                   } else {
                       if(line[1] < lowestRed[1]) {
                         lowestRed[0] = line[0];
                         lowestRed[1] = line[1];
+                        lowestRed[2] = line[3];
                       }
                       if(line[2] > highestGreen[1]) {
                         highestGreen[0] = line[0];
                         highestGreen[1] = line[2];
+                        highestGreen[2] = line[4];
                       }
                   }
               }); 
@@ -469,18 +496,22 @@ async function main() {
                   if (pancakePriceCheck.highPrice > highestGreen[1] && pancakePriceCheck.lowPrice < lowestRed[1]) {
                       highestGreen[0] = pancakePriceCheck.highPair;
                       highestGreen[1] = pancakePriceCheck.highPrice;
+                      highestGreen[2] = null;
 
                       lowestRed[0] = pancakePriceCheck.lowPair;
                       lowestRed[1] = pancakePriceCheck.lowPrice;
+                      lowestRed[2] = null;
                   } else { //otherwise check with cexes 
                       if (pancakePriceCheck.highPrice > highestGreen[1]) {
                           highestGreen[0] = pancakePriceCheck.highPair;
                           highestGreen[1] = pancakePriceCheck.highPrice;
+                          highestGreen[2] = null;
                       }
 
                       if (pancakePriceCheck.highPrice < lowestRed[1]) {
                         lowestRed[0] = pancakePriceCheck.lowPair;
                         lowestRed[1] = pancakePriceCheck.lowPrice;
+                        lowestRed[2] = null;
                       }
                   }
               }
@@ -548,7 +579,7 @@ async function main() {
                     }
                 }
 
-                readyForDOM.push({ tokenId, tokenName, tokenBurn, lowestRed, highestGreen, gain });
+                readyForDOM.push({ tokenId, tokenName, tokenBurn, lowestRed, highestGreen, gain});
               }
 
               index++; 
