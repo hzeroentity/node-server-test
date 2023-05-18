@@ -56,7 +56,10 @@ app.get('/api/data', async (req, res) => {
 
         if(tokenId != '') {
             const index = currentData.findIndex(item => item.tokenId === tokenId)
-            res.json(currentData[index]);
+            const tokenAddress = getTokens(tokenId).address;
+            const dataAndAdrress = [currentData[index], tokenAddress] 
+
+            res.json(dataAndAdrress);
         } else {
             res.json(currentData);
         }
