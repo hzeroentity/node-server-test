@@ -166,57 +166,65 @@ async function main() {
     
     tokenList.forEach(token => {
 
-      // Prepare URLs befor API calls
-      token.exchanges.forEach(exchange => {
+        // Prepare URLs befor API calls
+        token.exchanges.forEach(exchange => {
   
-        switch(exchange) {
-            case 'kucoin':
-              tokenInfo = token.id + '|' + token.name + '|' + token.burn;
-              url = toFetchURL = _kucoinOrderBookURL + token.id + _kucoinPairDivider + 'USDT';
-              exchangeAndURL.push({ tokenInfo, exchange, url });
-            break;
-            case 'bkex':
-              tokenInfo = token.id + '|' + token.name + '|' + token.burn;
-              if (token.id == 'ODOGE') {
-                url = _bkexOrderBookURL + 'OPTIMISMDOGE' + _bkexPairDivider + 'USDT' + _bkexOrderBookParameter + '20';
-              } else {
-                url = _bkexOrderBookURL + token.id + _bkexPairDivider + 'USDT' + _bkexOrderBookParameter + '20';
-              }
-              exchangeAndURL.push({ tokenInfo, exchange, url });
-            break;
-            case 'cointiger':
-              tokenInfo = token.id + '|' + token.name + '|' + token.burn;
-              url = _cointigerOrderBookURL + token.id.toLowerCase() + 'usdt' + _cointigerOrderBookParameter;
-              exchangeAndURL.push({ tokenInfo, exchange, url });
-            break;
-            case 'mexc':
-              tokenInfo = token.id + '|' + token.name + '|' + token.burn;
-              url = _mexcOrderBookURL + token.id + 'USDT';
-              exchangeAndURL.push({ tokenInfo, exchange, url });
-            break;
-            case 'latoken':
-              tokenInfo = token.id + '|' + token.name + '|' + token.burn;
-              url = _latokenOrderBookURL + token.id + '/USDT';
-              exchangeAndURL.push({ tokenInfo, exchange, url });
-            break;
-            case 'bitmart':
-              tokenInfo = token.id + '|' + token.name + '|' + token.burn;
-              url = _bitmartOrderBookURL + token.id + _bitmartPairDivider + 'USDT';
-              exchangeAndURL.push({ tokenInfo, exchange, url });
-            break;
-            case 'pancakeswap':
-              tokenInfo = token.id + '|' + token.name + '|' + token.burn;
-              url = _dexScreenerURL + token.address;
-              exchangeAndURL.push({ tokenInfo, exchange, url });
-            break;
-          } 
-      }); 
+            switch(exchange) {
+                case 'kucoin':
+                tokenInfo = token.id + '|' + token.name + '|' + token.burn;
+                url = toFetchURL = _kucoinOrderBookURL + token.id + _kucoinPairDivider + 'USDT';
+                exchangeAndURL.push({ tokenInfo, exchange, url });
+                break;
+                
+                case 'bkex':
+                tokenInfo = token.id + '|' + token.name + '|' + token.burn;
+                if (token.id == 'ODOGE') {
+                    url = _bkexOrderBookURL + 'OPTIMISMDOGE' + _bkexPairDivider + 'USDT' + _bkexOrderBookParameter + '20';
+                } else {
+                    url = _bkexOrderBookURL + token.id + _bkexPairDivider + 'USDT' + _bkexOrderBookParameter + '20';
+                }
+                exchangeAndURL.push({ tokenInfo, exchange, url });
+                break;
+                
+                case 'cointiger':
+                tokenInfo = token.id + '|' + token.name + '|' + token.burn;
+                url = _cointigerOrderBookURL + token.id.toLowerCase() + 'usdt' + _cointigerOrderBookParameter;
+                exchangeAndURL.push({ tokenInfo, exchange, url });
+                break;
+                
+                case 'mexc':
+                tokenInfo = token.id + '|' + token.name + '|' + token.burn;
+                url = _mexcOrderBookURL + token.id + 'USDT';
+                exchangeAndURL.push({ tokenInfo, exchange, url });
+                break;
+                
+                case 'latoken':
+                tokenInfo = token.id + '|' + token.name + '|' + token.burn;
+                url = _latokenOrderBookURL + token.id + '/USDT';
+                exchangeAndURL.push({ tokenInfo, exchange, url });
+                break;
+                
+                case 'bitmart':
+                tokenInfo = token.id + '|' + token.name + '|' + token.burn;
+                url = _bitmartOrderBookURL + token.id + _bitmartPairDivider + 'USDT';
+                exchangeAndURL.push({ tokenInfo, exchange, url });
+                break;
+                
+                case 'pancakeswap':
+                tokenInfo = token.id + '|' + token.name + '|' + token.burn;
+                url = _dexScreenerURL + token.address;
+                exchangeAndURL.push({ tokenInfo, exchange, url });
+                break;
+            } 
+        }); 
   
     });
+
 
     const unorderedData = [];
     const readyForDOM = [];
 
+    // Make all API calls
     try {
         await Promise.all(
             exchangeAndURL.map(({ tokenInfo, exchange, url }) => {
@@ -226,39 +234,47 @@ async function main() {
           })
         );
 
-        const groupedData = unorderedData.reduce((acc, obj) => {
-          const { tokenInfo, exchange, data } = obj;
-          if (!acc[tokenInfo]) {
-            acc[tokenInfo] = { [exchange]: data };
-          } else if (!acc[tokenInfo][exchange]) {
-            acc[tokenInfo][exchange] = data;
-          }
-          return acc;
-        }, {});
-        
-        const orderedData = Object.entries(groupedData).map(([tokenInfo, exchanges]) => ({
-          tokenInfo,
-          exchanges: Object.entries(exchanges).map(([exchange, data]) => ({ exchange, data })),
-        }));
-        
+    } catch (error) {
+    console.error('Error making API calls: ' + error);
+    }
+
+    // Properly group response data
+    const groupedData = unorderedData.reduce((acc, obj) => {
+        const { tokenInfo, exchange, data } = obj;
+        if (!acc[tokenInfo]) {
+        acc[tokenInfo] = { [exchange]: data };
+        } else if (!acc[tokenInfo][exchange]) {
+        acc[tokenInfo][exchange] = data;
+        }
+        return acc;
+    }, {});
+    
+    const orderedData = Object.entries(groupedData).map(([tokenInfo, exchanges]) => ({
+        tokenInfo,
+        exchanges: Object.entries(exchanges).map(([exchange, data]) => ({ exchange, data })),
+    }));
+    
+    // Loop all responses and make calculations
+
+    try {
+   
         orderedData.forEach(token => {
 
-          const exchangeAndPrice = [];
-          let index = 0;
-          let pancakePriceCheck = { lowPrice: '', lowPair: '', highPrice: '', highPair: '', firstLoop: true}; //['', '', '', '', false];  // 0 lowest price, 1 low pair, 2 highest price, 3 high pair, 4 first set done
+            const exchangeAndPrice = [];
+            let index = 0;
+            let pancakePriceCheck = { lowPrice: '', lowPair: '', highPrice: '', highPair: '', firstLoop: true}; //['', '', '', '', false];  // 0 lowest price, 1 low pair, 2 highest price, 3 high pair, 4 first set done
 
-          let found = false;
+            let found = false;
 
-          
-          //ASK = RED
-          //BID = GREEN
+            
+            //ASK = RED
+            //BID = GREEN
+            token.exchanges.forEach(res => {
 
-          token.exchanges.forEach(res => {
-
-            let exchangeData = res.data;
-              
-              switch(res.exchange) {
-                  case 'kucoin':
+                let exchangeData = res.data;
+                
+                switch(res.exchange) {
+                    case 'kucoin':
                     greenPrice = null; 
                     redPrice = null;
                     greenAvailableLiquidity = null;
@@ -283,33 +299,35 @@ async function main() {
                     });
                     exchangeAndPrice.push(['kucoin', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);
                     break;
-                  case 'bkex':
+
+                    case 'bkex':
                     greenPrice = null;    
                     redPrice = null; 
                     greenAvailableLiquidity = null;
                     redAvailableLiquidity = null;
 
-                      found = false;
-                      exchangeData.data.bid.forEach(order => {
-                          if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
+                        found = false;
+                        exchangeData.data.bid.forEach(order => {
+                            if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
                             greenPrice = negativePowerResolver(order[0]);
                             greenAvailableLiquidity = order[1] * order[0];
-                              found = true;
-                          }
-                      });
+                                found = true;
+                            }
+                        });
 
-                      found = false;
-                      exchangeData.data.ask.forEach(order => {
-                          if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
+                        found = false;
+                        exchangeData.data.ask.forEach(order => {
+                            if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
                             redPrice = negativePowerResolver(order[0]);
                             redAvailableLiquidity = order[1] * order[0];
-                              found = true;
-                          }
-                      });
+                                found = true;
+                            }
+                        });
 
-                      exchangeAndPrice.push(['bkex', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
-                      break;
-                  case 'cointiger':
+                        exchangeAndPrice.push(['bkex', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
+                    break;
+
+                    case 'cointiger':
                     greenPrice = null; 
                     redPrice= null;
                     greenAvailableLiquidity = null;
@@ -335,7 +353,7 @@ async function main() {
 
                     exchangeAndPrice.push(['cointiger', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);                 
                     break;
-                  case 'mexc':
+                    case 'mexc':
                     greenPrice = null; 
                     redPrice = null;
                     greenAvailableLiquidity = null;
@@ -360,7 +378,8 @@ async function main() {
                     });
                     exchangeAndPrice.push(['mexc', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
                     break;
-                  case 'latoken':
+
+                    case 'latoken':
                     greenPrice = null; 
                     redPrice = null;
                     greenAvailableLiquidity = null;
@@ -387,7 +406,8 @@ async function main() {
                     
                     exchangeAndPrice.push(['latoken', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
                     break;
-                  case 'bitmart':
+
+                    case 'bitmart':
                     greenPrice = null; 
                     redPrice = null;
                     greenAvailableLiquidity = null;
@@ -416,59 +436,60 @@ async function main() {
                     
                     exchangeAndPrice.push(['bitmart', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
                     break;
-                  case 'pancakeswap':
 
-                      const dexPairs = exchangeData.pairs;
-                      dexPairs.forEach(singlePair => {
-                          if (singlePair.dexId == 'pancakeswap') {
-                              if (singlePair.liquidity.usd >= 2500) {
+                    case 'pancakeswap':
 
-                                  if (pancakePriceCheck.firstLoop) {
-                                      pancakePriceCheck.lowPrice = singlePair.priceUsd;
-                                      pancakePriceCheck.lowPair = singlePair.baseToken.symbol + '/' + singlePair.quoteToken.symbol;
-                                      pancakePriceCheck.highPrice = singlePair.priceUsd;
-                                      pancakePriceCheck.highPair = singlePair.baseToken.symbol + '/' + singlePair.quoteToken.symbol;
-                                      pancakePriceCheck.firstLoop = false;
-                                  } else {
+                        const dexPairs = exchangeData.pairs;
+                        dexPairs.forEach(singlePair => {
+                            if (singlePair.dexId == 'pancakeswap') {
+                                if (singlePair.liquidity.usd >= 2500) {
 
-                                      if(singlePair.priceUsd < pancakePriceCheck.lowPrice) {
-                                          pancakePriceCheck.lowPrice = singlePair.priceUsd;
-                                          pancakePriceCheck.lowPair = singlePair.baseToken.symbol + '/' + singlePair.quoteToken.symbol;
-                                      }
+                                    if (pancakePriceCheck.firstLoop) {
+                                        pancakePriceCheck.lowPrice = singlePair.priceUsd;
+                                        pancakePriceCheck.lowPair = singlePair.baseToken.symbol + '/' + singlePair.quoteToken.symbol;
+                                        pancakePriceCheck.highPrice = singlePair.priceUsd;
+                                        pancakePriceCheck.highPair = singlePair.baseToken.symbol + '/' + singlePair.quoteToken.symbol;
+                                        pancakePriceCheck.firstLoop = false;
+                                    } else {
 
-                                      if(singlePair.priceUsd > pancakePriceCheck.highPrice) {
-                                          pancakePriceCheck.highPrice = singlePair.priceUsd;
-                                          pancakePriceCheck.highPair = singlePair.baseToken.symbol + '/' + singlePair.quoteToken.symbol;
-                                      }
+                                        if(singlePair.priceUsd < pancakePriceCheck.lowPrice) {
+                                            pancakePriceCheck.lowPrice = singlePair.priceUsd;
+                                            pancakePriceCheck.lowPair = singlePair.baseToken.symbol + '/' + singlePair.quoteToken.symbol;
+                                        }
 
-                                  }
-                              }
-                          }
-                      });
+                                        if(singlePair.priceUsd > pancakePriceCheck.highPrice) {
+                                            pancakePriceCheck.highPrice = singlePair.priceUsd;
+                                            pancakePriceCheck.highPair = singlePair.baseToken.symbol + '/' + singlePair.quoteToken.symbol;
+                                        }
+
+                                    }
+                                }
+                            }
+                        });
 
 
-                      // checks how many decimals the price has
-                      pancakePriceCheck.lowPrice = negativePowerResolver(pancakePriceCheck.lowPrice);
-                      pancakePriceCheck.highPrice = negativePowerResolver(pancakePriceCheck.highPrice);
-                      
-                      const lowDecimals = decimalsCounter(pancakePriceCheck.lowPrice);
-                      const highDecimals = decimalsCounter(pancakePriceCheck.highPrice);
+                        // checks how many decimals the price has
+                        pancakePriceCheck.lowPrice = negativePowerResolver(pancakePriceCheck.lowPrice);
+                        pancakePriceCheck.highPrice = negativePowerResolver(pancakePriceCheck.highPrice);
+                        
+                        const lowDecimals = decimalsCounter(pancakePriceCheck.lowPrice);
+                        const highDecimals = decimalsCounter(pancakePriceCheck.highPrice);
 
-                      // Add and remove 1% of the price to take swap fees in account
-                      pancakePriceCheck.lowPrice = (pancakePriceCheck.lowPrice * 1.01).toFixed(lowDecimals);
-                      pancakePriceCheck.highPrice = (pancakePriceCheck.highPrice * 0.99).toFixed(highDecimals);
-                  
-                  break;
-              }               
+                        // Add and remove 1% of the price to take swap fees in account
+                        pancakePriceCheck.lowPrice = (pancakePriceCheck.lowPrice * 1.01).toFixed(lowDecimals);
+                        pancakePriceCheck.highPrice = (pancakePriceCheck.highPrice * 0.99).toFixed(highDecimals);
+                    
+                    break;
+                }               
 
-              let highestGreen = ['','',''];
-              let lowestRed = ['','',''];
-              
-              let first = true;
+                let highestGreen = ['','',''];
+                let lowestRed = ['','',''];
+            
+                let first = true;
 
-              // find cexes highest ask and lowest bid
-              exchangeAndPrice.forEach(line => {
-                  if(first) {
+                // find cexes highest ask and lowest bid
+                exchangeAndPrice.forEach(line => {
+                    if(first) {
                     lowestRed[0] = line[0];
                     lowestRed[1] = line[1];
                     lowestRed[2] = line[3];
@@ -477,133 +498,138 @@ async function main() {
                     highestGreen[1] = line[2];
                     highestGreen[2] = line[4];
                     first = false;
-                  } else {
-                      if(line[1] < lowestRed[1]) {
+                    } else {
+                        if(line[1] < lowestRed[1]) {
                         lowestRed[0] = line[0];
                         lowestRed[1] = line[1];
                         lowestRed[2] = line[3];
-                      }
-                      if(line[2] > highestGreen[1]) {
+                        }
+                        if(line[2] > highestGreen[1]) {
                         highestGreen[0] = line[0];
                         highestGreen[1] = line[2];
                         highestGreen[2] = line[4];
-                      }
-                  }
-              }); 
+                        }
+                    }
+                }); 
 
-              //check pancake prices
-              // TO DO add control to figure if the 10% penalty having pancake in buy or sell makes it still the best choice
-              if(pancakePriceCheck.firstLoop == false) {
+                //check pancake prices
+                // TO DO add control to figure if the 10% penalty having pancake in buy or sell makes it still the best choice
+                if(pancakePriceCheck.firstLoop == false) {
 
-                  // check if pancake itself has higher discrepancy than Cex
-                  if (pancakePriceCheck.highPrice > highestGreen[1] && pancakePriceCheck.lowPrice < lowestRed[1]) {
-                      highestGreen[0] = pancakePriceCheck.highPair;
-                      highestGreen[1] = pancakePriceCheck.highPrice;
-                      highestGreen[2] = null;
+                    // check if pancake itself has higher discrepancy than Cex
+                    if (pancakePriceCheck.highPrice > highestGreen[1] && pancakePriceCheck.lowPrice < lowestRed[1]) {
+                        highestGreen[0] = pancakePriceCheck.highPair;
+                        highestGreen[1] = pancakePriceCheck.highPrice;
+                        highestGreen[2] = null;
 
-                      lowestRed[0] = pancakePriceCheck.lowPair;
-                      lowestRed[1] = pancakePriceCheck.lowPrice;
-                      lowestRed[2] = null;
-                  } else { //otherwise check with cexes 
-                      if (pancakePriceCheck.highPrice > highestGreen[1]) {
-                          highestGreen[0] = pancakePriceCheck.highPair;
-                          highestGreen[1] = pancakePriceCheck.highPrice;
-                          highestGreen[2] = null;
-                      }
-
-                      if (pancakePriceCheck.highPrice < lowestRed[1]) {
                         lowestRed[0] = pancakePriceCheck.lowPair;
                         lowestRed[1] = pancakePriceCheck.lowPrice;
                         lowestRed[2] = null;
-                      }
-                  }
-              }
+                    } else { //otherwise check with cexes 
+                        if (pancakePriceCheck.highPrice > highestGreen[1]) {
+                            highestGreen[0] = pancakePriceCheck.highPair;
+                            highestGreen[1] = pancakePriceCheck.highPrice;
+                            highestGreen[2] = null;
+                        }
 
-              if(index == token.exchanges.length - 1) {
-
-                retrieveTokenInfo = token.tokenInfo.split('|');
-
-                const tokenId = retrieveTokenInfo[0];
-                const tokenName = retrieveTokenInfo[1];
-                const tokenBurn = retrieveTokenInfo[2];
-
-                // calculate gain (must be moved in the data calculation before to take tokenBurn in account)
-                let increase = highestGreen[1] - lowestRed[1];
-                let percentageIncrease = increase / lowestRed[1] * 100;
-
-                
-                let gain = 0;
-
-                // if the trade is cex -> cex apply burn only once
-                // if the trade is dex -> cex / cex -> dex apply burn twice
-                if (tokenBurn > 0) {
-                    if (highestGreen[0].includes('/') || lowestRed[0].includes('/')) { //if it contains '/' it means that it is a pancake pair
-                        gain = (Math.round(percentageIncrease * 100) / 100  - (tokenBurn * 2)).toFixed(2);
-                    } else {
-                        gain = (Math.round(percentageIncrease * 100) / 100 - (tokenBurn)).toFixed(2) ;
+                        if (pancakePriceCheck.highPrice < lowestRed[1]) {
+                        lowestRed[0] = pancakePriceCheck.lowPair;
+                        lowestRed[1] = pancakePriceCheck.lowPrice;
+                        lowestRed[2] = null;
+                        }
                     }
-                } else {
-                    gain = percentageIncrease.toFixed(2);
-                }
-                
-                let lowBurn = false;
-                let highBurn = false;
-
-                
-                // Send Alerts
-                if (tokenBurn >= 8 && gain > 5) {
-                    highBurn = true;
-                } else if (tokenBurn < 8 && gain > 3) {
-                    lowBurn = true;
                 }
 
+                if(index == token.exchanges.length - 1) {
 
-                if (lowBurn == true || highBurn == true) {
-                    const checkExistingAlert = activeAlerts.find(item => item.id === tokenId);
+                    retrieveTokenInfo = token.tokenInfo.split('|');
 
-                    if (checkExistingAlert) {
-                        if (checkExistingAlert.gain + 1 < gain ) {
-                            activeAlerts = updateAlertsGain(activeAlerts, tokenId, gain);
-                            sendTelegramAlert(tokenId, tokenName, gain, tokenBurn);
+                    const tokenId = retrieveTokenInfo[0];
+                    const tokenName = retrieveTokenInfo[1];
+                    const tokenBurn = retrieveTokenInfo[2];
+
+                    // calculate gain (must be moved in the data calculation before to take tokenBurn in account)
+                    let increase = highestGreen[1] - lowestRed[1];
+                    let percentageIncrease = increase / lowestRed[1] * 100;
+
+            
+                    let gain = 0;
+
+                    // if the trade is cex -> cex apply burn only once
+                    // if the trade is dex -> cex / cex -> dex apply burn twice
+                    if (tokenBurn > 0) {
+                        if (highestGreen[0].includes('/') || lowestRed[0].includes('/')) { //if it contains '/' it means that it is a pancake pair
+                            gain = (Math.round(percentageIncrease * 100) / 100  - (tokenBurn * 2)).toFixed(2);
                         } else {
-                            if (tokenBurn >= 8) {
-                                if (gain < 5) {
-                                    activeAlerts = activeAlerts.filter(item => item.id == tokenId);
-                                }
-                            } else {
-                                if (gain < 3) {
-                                    activeAlerts = activeAlerts.filter(item => item.id == tokenId);
-                                }
-                            }
+                            gain = (Math.round(percentageIncrease * 100) / 100 - (tokenBurn)).toFixed(2) ;
                         }
                     } else {
-                        activeAlerts.push({ id: tokenId, name: tokenName, gain: gain });
-                        sendTelegramAlert(tokenId, tokenName, gain, tokenBurn);
+                        gain = percentageIncrease.toFixed(2);
                     }
+            
+                    let lowBurn = false;
+                    let highBurn = false;
+
+            
+                    // Send Alerts
+                    if (tokenBurn >= 8 && gain > 5) {
+                        highBurn = true;
+                    } else if (tokenBurn < 8 && gain > 3) {
+                        lowBurn = true;
+                    }
+
+
+                    if (lowBurn == true || highBurn == true) {
+                        const checkExistingAlert = activeAlerts.find(item => item.id === tokenId);
+
+                        if (checkExistingAlert) {
+                            // If gain is 1% more than last time, update the array
+                            if (checkExistingAlert.gain + 1 < gain ) {
+                                activeAlerts = updateAlertsGain(activeAlerts, tokenId, gain);
+                                sendTelegramAlert(tokenId, tokenName, gain, tokenBurn);
+                            } else {
+                                // Else, if lower the threshold, delete that alert 
+                                if (tokenBurn >= 8) {
+                                    if (gain < 5) {
+                                        const entryIndex = myArray.findIndex(entry => entry.id === tokenId);
+                                        activeAlerts.splice(entryIndex, 1);
+                                    }
+                                } else {
+                                    if (gain < 3) {
+                                        const entryIndex = myArray.findIndex(entry => entry.id === tokenId);
+                                        activeAlerts.splice(entryIndex, 1);
+                                    }
+                                }
+                            }
+                        } else {
+                            activeAlerts.push({ id: tokenId, name: tokenName, gain: gain });
+                            sendTelegramAlert(tokenId, tokenName, gain, tokenBurn);
+                        }
+                    }
+
+                    readyForDOM.push({ tokenId, tokenName, tokenBurn, lowestRed, highestGreen, gain});
                 }
 
-                readyForDOM.push({ tokenId, tokenName, tokenBurn, lowestRed, highestGreen, gain});
-              }
-
-              index++; 
-          
-          })
+                index++; 
+            })
         });
+    
+    } catch (error) {
+        console.error('Error while making calculations: ' + error);
+    }
 
-        readyForDOM.sort((a, b) => b.gain - a.gain);
-        currentData = readyForDOM;
+    // Sort the final data by gain percentage
+    readyForDOM.sort((a, b) => b.gain - a.gain);
+    // Set final data to shared array for client to retrieve
+    currentData = readyForDOM;
 
-      } catch (error) {
-        console.error(error);
-      }
 }
 
 cron.schedule('*/1 * * * *', main);
 
+// Send Telegram Bot notifications
 function sendTelegramAlert(id, name, gain, burn) {
 
-
-    // Send Telegram Bot notifications
     if (burn >= 8) {
         if (gain >= 5 && gain < 10) {
             bot.telegram.sendMessage(process.env.TELEGRAM_GROUPCHAT_ID, `💵 Good gain del ${gain}% su ${name}! Vedi: miralmedia.it/tools/arbitrix/details.html?token=${id}`);
