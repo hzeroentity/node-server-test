@@ -32,7 +32,6 @@ const _bitmartOrderBookURL = 'https://api-cloud.bitmart.com/spot/v1/symbols/book
 // API URLs for deposit and withdraw availability
 const _gateDWStatus = 'https://api.gateio.ws/api/v4/wallet/currency_chains?currency='; // + currency ID ex. USDT
 
-
 // Other manually inserted values
 const _minimumVolumeOrderBook = 10; //usd
 
@@ -61,7 +60,11 @@ app.get('/api/data', async (req, res) => {
 
             res.json(dataAndAdrress);
         } else {
-            res.json(currentData);
+            if(currentData.length > 0) {
+                res.json(currentData);
+            } else {
+                main();
+            }
         }
         
     } catch (error) {
@@ -235,7 +238,7 @@ async function main() {
         );
 
     } catch (error) {
-    console.error('Error making API calls: ' + error);
+    console.error('Error on API calls for ' + tokenInfo + '. ' + error);
     }
 
     // Properly group response data
@@ -266,352 +269,354 @@ async function main() {
 
             let found = false;
 
-            
-            //ASK = RED
-            //BID = GREEN
-            token.exchanges.forEach(res => {
-
-                let exchangeData = res.data;
+            if (token.exchanges.length > 1) {  //check that this token has data for at least two exchanges before making calcuations
                 
-                switch(res.exchange) {
-                    case 'kucoin':
-                    greenPrice = null; 
-                    redPrice = null;
-                    greenAvailableLiquidity = null;
-                    redAvailableLiquidity = null;
+                //ASK = RED
+                //BID = GREEN
+                token.exchanges.forEach(res => {
 
-                    found = false;
-                    exchangeData.data.bids.forEach(order => {
-                        if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
-                            greenPrice = negativePowerResolver(order[0]);
-                            greenAvailableLiquidity = order[1] * order[0];
-                            found = true;
-                        }
-                    });
-
-                    found = false;
-                    exchangeData.data.asks.forEach(order => {
-                        if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
-                            redPrice = negativePowerResolver(order[0]);
-                            redAvailableLiquidity = order[1] * order[0];
-                            found = true;
-                        }
-                    });
-                    exchangeAndPrice.push(['kucoin', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);
-                    break;
-
-                    case 'bkex':
-                    greenPrice = null;    
-                    redPrice = null; 
-                    greenAvailableLiquidity = null;
-                    redAvailableLiquidity = null;
+                    let exchangeData = res.data;
+                    
+                    switch(res.exchange) {
+                        case 'kucoin':
+                        greenPrice = null; 
+                        redPrice = null;
+                        greenAvailableLiquidity = null;
+                        redAvailableLiquidity = null;
 
                         found = false;
-                        exchangeData.data.bid.forEach(order => {
+                        exchangeData.data.bids.forEach(order => {
                             if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
-                            greenPrice = negativePowerResolver(order[0]);
-                            greenAvailableLiquidity = order[1] * order[0];
+                                greenPrice = negativePowerResolver(order[0]);
+                                greenAvailableLiquidity = order[1] * order[0];
                                 found = true;
                             }
                         });
 
                         found = false;
-                        exchangeData.data.ask.forEach(order => {
+                        exchangeData.data.asks.forEach(order => {
                             if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
-                            redPrice = negativePowerResolver(order[0]);
-                            redAvailableLiquidity = order[1] * order[0];
+                                redPrice = negativePowerResolver(order[0]);
+                                redAvailableLiquidity = order[1] * order[0];
+                                found = true;
+                            }
+                        });
+                        exchangeAndPrice.push(['kucoin', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);
+                        break;
+
+                        case 'bkex':
+                        greenPrice = null;    
+                        redPrice = null; 
+                        greenAvailableLiquidity = null;
+                        redAvailableLiquidity = null;
+
+                            found = false;
+                            exchangeData.data.bid.forEach(order => {
+                                if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
+                                greenPrice = negativePowerResolver(order[0]);
+                                greenAvailableLiquidity = order[1] * order[0];
+                                    found = true;
+                                }
+                            });
+
+                            found = false;
+                            exchangeData.data.ask.forEach(order => {
+                                if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
+                                redPrice = negativePowerResolver(order[0]);
+                                redAvailableLiquidity = order[1] * order[0];
+                                    found = true;
+                                }
+                            });
+
+                            exchangeAndPrice.push(['bkex', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
+                        break;
+
+                        case 'cointiger':
+                        greenPrice = null; 
+                        redPrice= null;
+                        greenAvailableLiquidity = null;
+                        redAvailableLiquidity = null;
+
+                        found = false;
+                        exchangeData.data.depth_data.tick.buys.forEach(order => {
+                            if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
+                                greenPrice = negativePowerResolver(order[0]);
+                                greenAvailableLiquidity = order[1] * order[0];
                                 found = true;
                             }
                         });
 
-                        exchangeAndPrice.push(['bkex', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
-                    break;
+                        found = false;
+                        exchangeData.data.depth_data.tick.asks.forEach(order => {
+                            if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
+                                redPrice = negativePowerResolver(order[0]);
+                                redAvailableLiquidity = order[1] * order[0];
+                                found = true;
+                            }
+                        });
 
-                    case 'cointiger':
-                    greenPrice = null; 
-                    redPrice= null;
-                    greenAvailableLiquidity = null;
-                    redAvailableLiquidity = null;
+                        exchangeAndPrice.push(['cointiger', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);                 
+                        break;
+                        case 'mexc':
+                        greenPrice = null; 
+                        redPrice = null;
+                        greenAvailableLiquidity = null;
+                        redAvailableLiquidity = null;
 
-                    found = false;
-                    exchangeData.data.depth_data.tick.buys.forEach(order => {
-                        if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
-                            greenPrice = negativePowerResolver(order[0]);
-                            greenAvailableLiquidity = order[1] * order[0];
-                            found = true;
-                        }
-                    });
+                        found = false;
+                        exchangeData.bids.forEach(order => {
+                            if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
+                                greenPrice = negativePowerResolver(order[0]);
+                                greenAvailableLiquidity = order[1] * order[0];
+                                found = true;
+                            }
+                        });
 
-                    found = false;
-                    exchangeData.data.depth_data.tick.asks.forEach(order => {
-                        if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
-                            redPrice = negativePowerResolver(order[0]);
-                            redAvailableLiquidity = order[1] * order[0];
-                            found = true;
-                        }
-                    });
+                        found = false;
+                        exchangeData.asks.forEach(order => {
+                            if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
+                                redPrice = negativePowerResolver(order[0]);
+                                redAvailableLiquidity = order[1] * order[0];
+                                found = true;
+                            }
+                        });
+                        exchangeAndPrice.push(['mexc', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
+                        break;
 
-                    exchangeAndPrice.push(['cointiger', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);                 
-                    break;
-                    case 'mexc':
-                    greenPrice = null; 
-                    redPrice = null;
-                    greenAvailableLiquidity = null;
-                    redAvailableLiquidity = null;
+                        case 'latoken':
+                        greenPrice = null; 
+                        redPrice = null;
+                        greenAvailableLiquidity = null;
+                        redAvailableLiquidity = null;
 
-                    found = false;
-                    exchangeData.bids.forEach(order => {
-                        if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
-                            greenPrice = negativePowerResolver(order[0]);
-                            greenAvailableLiquidity = order[1] * order[0];
-                            found = true;
-                        }
-                    });
+                        found = false;
 
-                    found = false;
-                    exchangeData.asks.forEach(order => {
-                        if(order[1] * order[0] > _minimumVolumeOrderBook && found == false) {
-                            redPrice = negativePowerResolver(order[0]);
-                            redAvailableLiquidity = order[1] * order[0];
-                            found = true;
-                        }
-                    });
-                    exchangeAndPrice.push(['mexc', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
-                    break;
+                        exchangeData.bid.map(order => {
+                            if(order.price * order.quantity > _minimumVolumeOrderBook && found == false) {
+                                greenPrice = negativePowerResolver(order.price);
+                                greenAvailableLiquidity = order.price * order.quantity;
+                                found = true;
+                            }
+                        });
 
-                    case 'latoken':
-                    greenPrice = null; 
-                    redPrice = null;
-                    greenAvailableLiquidity = null;
-                    redAvailableLiquidity = null;
+                        found = false;
+                        exchangeData.ask.map(order => {
+                            if(order.price * order.quantity> _minimumVolumeOrderBook && found == false) {
+                                redPrice = negativePowerResolver(order.price);
+                                redAvailableLiquidity = order.price * order.quantity;
+                                found = true;
+                            }
+                        });
+                        
+                        exchangeAndPrice.push(['latoken', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
+                        break;
 
-                    found = false;
+                        case 'bitmart':
+                        greenPrice = null; 
+                        redPrice = null;
+                        greenAvailableLiquidity = null;
+                        redAvailableLiquidity = null;
 
-                    exchangeData.bid.map(order => {
-                        if(order.price * order.quantity > _minimumVolumeOrderBook && found == false) {
-                            greenPrice = negativePowerResolver(order.price);
-                            greenAvailableLiquidity = order.price * order.quantity;
-                            found = true;
-                        }
-                    });
+                        found = false;
 
-                    found = false;
-                    exchangeData.ask.map(order => {
-                        if(order.price * order.quantity> _minimumVolumeOrderBook && found == false) {
-                            redPrice = negativePowerResolver(order.price);
-                            redAvailableLiquidity = order.price * order.quantity;
-                            found = true;
-                        }
-                    });
-                    
-                    exchangeAndPrice.push(['latoken', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
-                    break;
+                        exchangeData.data.buys.map(order => {
+                            const bitmartPrice = negativePowerResolver(order.price)
+                            if(bitmartPrice * order.amount > _minimumVolumeOrderBook && found == false) {
+                                greenPrice = negativePowerResolver(bitmartPrice);
+                                greenAvailableLiquidity = bitmartPrice * order.amount;
+                                found = true;
+                            }
+                        });
 
-                    case 'bitmart':
-                    greenPrice = null; 
-                    redPrice = null;
-                    greenAvailableLiquidity = null;
-                    redAvailableLiquidity = null;
+                        found = false;
+                        exchangeData.data.sells.map(order => {
+                            const bitmartPrice = negativePowerResolver(order.price)
+                            if(bitmartPrice * order.amount > _minimumVolumeOrderBook && found == false) {
+                                redPrice = negativePowerResolver(bitmartPrice);
+                                redAvailableLiquidity = bitmartPrice * order.amount;
+                                found = true;
+                            }
+                        });
+                        
+                        exchangeAndPrice.push(['bitmart', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
+                        break;
 
-                    found = false;
+                        case 'pancakeswap':
 
-                    exchangeData.data.buys.map(order => {
-                        const bitmartPrice = negativePowerResolver(order.price)
-                        if(bitmartPrice * order.amount > _minimumVolumeOrderBook && found == false) {
-                            greenPrice = negativePowerResolver(bitmartPrice);
-                            greenAvailableLiquidity = bitmartPrice * order.amount;
-                            found = true;
-                        }
-                    });
+                            const dexPairs = exchangeData.pairs;
+                            dexPairs.forEach(singlePair => {
+                                if (singlePair.dexId == 'pancakeswap') {
+                                    if (singlePair.liquidity.usd >= 2500) {
 
-                    found = false;
-                    exchangeData.data.sells.map(order => {
-                        const bitmartPrice = negativePowerResolver(order.price)
-                        if(bitmartPrice * order.amount > _minimumVolumeOrderBook && found == false) {
-                            redPrice = negativePowerResolver(bitmartPrice);
-                            redAvailableLiquidity = bitmartPrice * order.amount;
-                            found = true;
-                        }
-                    });
-                    
-                    exchangeAndPrice.push(['bitmart', redPrice, greenPrice, redAvailableLiquidity, greenAvailableLiquidity]);            
-                    break;
-
-                    case 'pancakeswap':
-
-                        const dexPairs = exchangeData.pairs;
-                        dexPairs.forEach(singlePair => {
-                            if (singlePair.dexId == 'pancakeswap') {
-                                if (singlePair.liquidity.usd >= 2500) {
-
-                                    if (pancakePriceCheck.firstLoop) {
-                                        pancakePriceCheck.lowPrice = singlePair.priceUsd;
-                                        pancakePriceCheck.lowPair = singlePair.baseToken.symbol + '/' + singlePair.quoteToken.symbol;
-                                        pancakePriceCheck.highPrice = singlePair.priceUsd;
-                                        pancakePriceCheck.highPair = singlePair.baseToken.symbol + '/' + singlePair.quoteToken.symbol;
-                                        pancakePriceCheck.firstLoop = false;
-                                    } else {
-
-                                        if(singlePair.priceUsd < pancakePriceCheck.lowPrice) {
+                                        if (pancakePriceCheck.firstLoop) {
                                             pancakePriceCheck.lowPrice = singlePair.priceUsd;
                                             pancakePriceCheck.lowPair = singlePair.baseToken.symbol + '/' + singlePair.quoteToken.symbol;
-                                        }
-
-                                        if(singlePair.priceUsd > pancakePriceCheck.highPrice) {
                                             pancakePriceCheck.highPrice = singlePair.priceUsd;
                                             pancakePriceCheck.highPair = singlePair.baseToken.symbol + '/' + singlePair.quoteToken.symbol;
-                                        }
+                                            pancakePriceCheck.firstLoop = false;
+                                        } else {
 
+                                            if(singlePair.priceUsd < pancakePriceCheck.lowPrice) {
+                                                pancakePriceCheck.lowPrice = singlePair.priceUsd;
+                                                pancakePriceCheck.lowPair = singlePair.baseToken.symbol + '/' + singlePair.quoteToken.symbol;
+                                            }
+
+                                            if(singlePair.priceUsd > pancakePriceCheck.highPrice) {
+                                                pancakePriceCheck.highPrice = singlePair.priceUsd;
+                                                pancakePriceCheck.highPair = singlePair.baseToken.symbol + '/' + singlePair.quoteToken.symbol;
+                                            }
+
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
 
 
-                        // checks how many decimals the price has
-                        pancakePriceCheck.lowPrice = negativePowerResolver(pancakePriceCheck.lowPrice);
-                        pancakePriceCheck.highPrice = negativePowerResolver(pancakePriceCheck.highPrice);
+                            // checks how many decimals the price has
+                            pancakePriceCheck.lowPrice = negativePowerResolver(pancakePriceCheck.lowPrice);
+                            pancakePriceCheck.highPrice = negativePowerResolver(pancakePriceCheck.highPrice);
+                            
+                            const lowDecimals = decimalsCounter(pancakePriceCheck.lowPrice);
+                            const highDecimals = decimalsCounter(pancakePriceCheck.highPrice);
+
+                            // Add and remove 1% of the price to take swap fees in account
+                            pancakePriceCheck.lowPrice = (pancakePriceCheck.lowPrice * 1.01).toFixed(lowDecimals);
+                            pancakePriceCheck.highPrice = (pancakePriceCheck.highPrice * 0.99).toFixed(highDecimals);
                         
-                        const lowDecimals = decimalsCounter(pancakePriceCheck.lowPrice);
-                        const highDecimals = decimalsCounter(pancakePriceCheck.highPrice);
+                        break;
+                    }               
 
-                        // Add and remove 1% of the price to take swap fees in account
-                        pancakePriceCheck.lowPrice = (pancakePriceCheck.lowPrice * 1.01).toFixed(lowDecimals);
-                        pancakePriceCheck.highPrice = (pancakePriceCheck.highPrice * 0.99).toFixed(highDecimals);
-                    
-                    break;
-                }               
+                    let highestGreen = ['','',''];
+                    let lowestRed = ['','',''];
+                
+                    let first = true;
 
-                let highestGreen = ['','',''];
-                let lowestRed = ['','',''];
-            
-                let first = true;
-
-                // find cexes highest ask and lowest bid
-                exchangeAndPrice.forEach(line => {
-                    if(first) {
-                    lowestRed[0] = line[0];
-                    lowestRed[1] = line[1];
-                    lowestRed[2] = line[3];
-                    
-                    highestGreen[0] = line[0];
-                    highestGreen[1] = line[2];
-                    highestGreen[2] = line[4];
-                    first = false;
-                    } else {
-                        if(line[1] < lowestRed[1]) {
+                    // find cexes highest ask and lowest bid
+                    exchangeAndPrice.forEach(line => {
+                        if(first) {
                         lowestRed[0] = line[0];
                         lowestRed[1] = line[1];
                         lowestRed[2] = line[3];
-                        }
-                        if(line[2] > highestGreen[1]) {
+                        
                         highestGreen[0] = line[0];
                         highestGreen[1] = line[2];
                         highestGreen[2] = line[4];
+                        first = false;
+                        } else {
+                            if(line[1] < lowestRed[1]) {
+                            lowestRed[0] = line[0];
+                            lowestRed[1] = line[1];
+                            lowestRed[2] = line[3];
+                            }
+                            if(line[2] > highestGreen[1]) {
+                            highestGreen[0] = line[0];
+                            highestGreen[1] = line[2];
+                            highestGreen[2] = line[4];
+                            }
                         }
-                    }
-                }); 
+                    }); 
 
-                //check pancake prices
-                // TO DO add control to figure if the 10% penalty having pancake in buy or sell makes it still the best choice
-                if(pancakePriceCheck.firstLoop == false) {
+                    //check pancake prices
+                    // TO DO add control to figure if the 10% penalty having pancake in buy or sell makes it still the best choice
+                    if(pancakePriceCheck.firstLoop == false) {
 
-                    // check if pancake itself has higher discrepancy than Cex
-                    if (pancakePriceCheck.highPrice > highestGreen[1] && pancakePriceCheck.lowPrice < lowestRed[1]) {
-                        highestGreen[0] = pancakePriceCheck.highPair;
-                        highestGreen[1] = pancakePriceCheck.highPrice;
-                        highestGreen[2] = null;
-
-                        lowestRed[0] = pancakePriceCheck.lowPair;
-                        lowestRed[1] = pancakePriceCheck.lowPrice;
-                        lowestRed[2] = null;
-                    } else { //otherwise check with cexes 
-                        if (pancakePriceCheck.highPrice > highestGreen[1]) {
+                        // check if pancake itself has higher discrepancy than Cex
+                        if (pancakePriceCheck.highPrice > highestGreen[1] && pancakePriceCheck.lowPrice < lowestRed[1]) {
                             highestGreen[0] = pancakePriceCheck.highPair;
                             highestGreen[1] = pancakePriceCheck.highPrice;
                             highestGreen[2] = null;
-                        }
 
-                        if (pancakePriceCheck.highPrice < lowestRed[1]) {
-                        lowestRed[0] = pancakePriceCheck.lowPair;
-                        lowestRed[1] = pancakePriceCheck.lowPrice;
-                        lowestRed[2] = null;
+                            lowestRed[0] = pancakePriceCheck.lowPair;
+                            lowestRed[1] = pancakePriceCheck.lowPrice;
+                            lowestRed[2] = null;
+                        } else { //otherwise check with cexes 
+                            if (pancakePriceCheck.highPrice > highestGreen[1]) {
+                                highestGreen[0] = pancakePriceCheck.highPair;
+                                highestGreen[1] = pancakePriceCheck.highPrice;
+                                highestGreen[2] = null;
+                            }
+
+                            if (pancakePriceCheck.highPrice < lowestRed[1]) {
+                            lowestRed[0] = pancakePriceCheck.lowPair;
+                            lowestRed[1] = pancakePriceCheck.lowPrice;
+                            lowestRed[2] = null;
+                            }
                         }
                     }
-                }
 
-                if(index == token.exchanges.length - 1) {
+                    if(index == token.exchanges.length - 1) {
 
-                    retrieveTokenInfo = token.tokenInfo.split('|');
+                        retrieveTokenInfo = token.tokenInfo.split('|');
 
-                    const tokenId = retrieveTokenInfo[0];
-                    const tokenName = retrieveTokenInfo[1];
-                    const tokenBurn = retrieveTokenInfo[2];
+                        const tokenId = retrieveTokenInfo[0];
+                        const tokenName = retrieveTokenInfo[1];
+                        const tokenBurn = retrieveTokenInfo[2];
 
-                    // calculate gain (must be moved in the data calculation before to take tokenBurn in account)
-                    let increase = highestGreen[1] - lowestRed[1];
-                    let percentageIncrease = increase / lowestRed[1] * 100;
+                        // calculate gain (must be moved in the data calculation before to take tokenBurn in account)
+                        let increase = highestGreen[1] - lowestRed[1];
+                        let percentageIncrease = increase / lowestRed[1] * 100;
 
-            
-                    let gain = 0;
+                
+                        let gain = 0;
 
-                    // if the trade is cex -> cex apply burn only once
-                    // if the trade is dex -> cex / cex -> dex apply burn twice
-                    if (tokenBurn > 0) {
-                        if (highestGreen[0].includes('/') || lowestRed[0].includes('/')) { //if it contains '/' it means that it is a pancake pair
-                            gain = (Math.round(percentageIncrease * 100) / 100  - (tokenBurn * 2)).toFixed(2);
-                        } else {
-                            gain = (Math.round(percentageIncrease * 100) / 100 - (tokenBurn)).toFixed(2) ;
-                        }
-                    } else {
-                        gain = percentageIncrease.toFixed(2);
-                    }
-            
-                    let lowBurn = false;
-                    let highBurn = false;
-
-            
-                    // Send Alerts
-                    if (tokenBurn >= 8 && gain > 5) {
-                        highBurn = true;
-                    } else if (tokenBurn < 8 && gain > 3) {
-                        lowBurn = true;
-                    }
-
-
-                    if (lowBurn == true || highBurn == true) {
-                        const checkExistingAlert = activeAlerts.find(item => item.id === tokenId);
-
-                        if (checkExistingAlert) {
-                            // If gain is 1% more than last time, update the array
-                            if (checkExistingAlert.gain + 1 < gain ) {
-                                activeAlerts = updateAlertsGain(activeAlerts, tokenId, gain);
-                                sendTelegramAlert(tokenId, tokenName, gain, tokenBurn);
+                        // if the trade is cex -> cex apply burn only once
+                        // if the trade is dex -> cex / cex -> dex apply burn twice
+                        if (tokenBurn > 0) {
+                            if (highestGreen[0].includes('/') || lowestRed[0].includes('/')) { //if it contains '/' it means that it is a pancake pair
+                                gain = (Math.round(percentageIncrease * 100) / 100  - (tokenBurn * 2)).toFixed(2);
                             } else {
-                                // Else, if lower the threshold, delete that alert 
-                                if (tokenBurn >= 8) {
-                                    if (gain < 5) {
-                                        const entryIndex = myArray.findIndex(entry => entry.id === tokenId);
-                                        activeAlerts.splice(entryIndex, 1);
-                                    }
-                                } else {
-                                    if (gain < 3) {
-                                        const entryIndex = myArray.findIndex(entry => entry.id === tokenId);
-                                        activeAlerts.splice(entryIndex, 1);
-                                    }
-                                }
+                                gain = (Math.round(percentageIncrease * 100) / 100 - (tokenBurn)).toFixed(2) ;
                             }
                         } else {
-                            activeAlerts.push({ id: tokenId, name: tokenName, gain: gain });
-                            sendTelegramAlert(tokenId, tokenName, gain, tokenBurn);
+                            gain = percentageIncrease.toFixed(2);
                         }
+                
+                        let lowBurn = false;
+                        let highBurn = false;
+
+                
+                        // Send Alerts
+                        if (tokenBurn >= 8 && gain > 5) {
+                            highBurn = true;
+                        } else if (tokenBurn < 8 && gain > 3) {
+                            lowBurn = true;
+                        }
+
+
+                        if (lowBurn == true || highBurn == true) {
+                            const checkExistingAlert = activeAlerts.find(item => item.id === tokenId);
+
+                            if (checkExistingAlert) {
+                                // If gain is 1% more than last time, update the array
+                                if (checkExistingAlert.gain + 1 < gain ) {
+                                    activeAlerts = updateAlertsGain(activeAlerts, tokenId, gain);
+                                    sendTelegramAlert(tokenId, tokenName, gain, tokenBurn);
+                                } else {
+                                    // Else, if lower the threshold, delete that alert 
+                                    if (tokenBurn >= 8) {
+                                        if (gain < 5) {
+                                            const entryIndex = myArray.findIndex(entry => entry.id === tokenId);
+                                            activeAlerts.splice(entryIndex, 1);
+                                        }
+                                    } else {
+                                        if (gain < 3) {
+                                            const entryIndex = myArray.findIndex(entry => entry.id === tokenId);
+                                            activeAlerts.splice(entryIndex, 1);
+                                        }
+                                    }
+                                }
+                            } else {
+                                activeAlerts.push({ id: tokenId, name: tokenName, gain: gain });
+                                sendTelegramAlert(tokenId, tokenName, gain, tokenBurn);
+                            }
+                        }
+
+                        readyForDOM.push({ tokenId, tokenName, tokenBurn, lowestRed, highestGreen, gain});
                     }
 
-                    readyForDOM.push({ tokenId, tokenName, tokenBurn, lowestRed, highestGreen, gain});
-                }
-
-                index++; 
-            })
+                    index++; 
+                })
+            }
         });
     
     } catch (error) {

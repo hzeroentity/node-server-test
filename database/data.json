@@ -60,7 +60,7 @@
       "bkex",
       "pancakeswap"
     ],
-    "burn": "5"
+    "burn": "10"
   },
   {
     "id": "JADE",
@@ -171,15 +171,47 @@
     "burn": "10"
   },
   {
-    "id": "RET",
-    "name": "Renewable Energy",
-    "address": "0x10b9dd394467f2cfbc769e07e88dc7e2c41b0965",
+    "id": "FLOKI",
+    "name": "FLOKI",
+    "address": "0xfb5b838b6cfeedc2873ab27866079ac55363d37e",
     "exchanges": [
+      "kucoin",
+      "bkex",
+      "bitmart",
       "cointiger",
-      "latoken",
+      "pancakeswap"
+    ],
+    "burn": "0"
+  },
+  {
+    "id": "EPX",
+    "name": "Ellipsis",
+    "address": "0xaf41054c1487b0e5e2b9250c0332ecbce6ce9d71",
+    "exchanges": [
+      "kucoin",
       "mexc",
       "pancakeswap"
     ],
-    "burn": "4"
+    "burn": "0"
+  },
+  {
+    "id": "CATGIRL",
+    "name": "Catgirl",
+    "address": "0x79eBC9A2ce02277A4b5b3A768b1C0A4ed75Bd936",
+    "exchanges": [
+      "bkex",
+      "pancakeswap"
+    ],
+    "burn": "0"
+  },
+  {
+    "id": "MTS",
+    "name": "Metastrike",
+    "address": "0x496cC0b4ee12Aa2AC4c42E93067484e7Ff50294b",
+    "exchanges": [
+      "kucoin",
+      "pancakeswap"
+    ],
+    "burn": "0"
   }
 ]
