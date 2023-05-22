@@ -444,10 +444,10 @@ async function main() {
                         case 'pancakeswap':
 
                             const dexPairs = exchangeData.pairs;
-                            dexPairs.forEach(singlePair => {
-                                if (singlePair.dexId == 'pancakeswap') {
-                                    if (singlePair.liquidity.usd >= 2500) {
 
+                            dexPairs.forEach(singlePair => {
+                                if (singlePair.dexId == 'pancakeswap' && singlePair.baseToken.symbol == token.tokenInfo.split('|')[0]) {
+                                    if (singlePair.liquidity.usd >= 2500) {
                                         if (pancakePriceCheck.firstLoop) {
                                             pancakePriceCheck.lowPrice = singlePair.priceUsd;
                                             pancakePriceCheck.lowPair = singlePair.baseToken.symbol + '/' + singlePair.quoteToken.symbol;
